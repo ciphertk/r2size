@@ -14,7 +14,7 @@ export function Dock({ result }: { readonly result: SizingResult }) {
       <p className={styles.risk}>risk {formatRisk(result.actualRisk)}</p>
       <div className={styles.action}>
         <CopyButton variant="primary" what="Quantity" text={copyQty(result.quantity)}>
-          Copy qty
+          Copy quantity
         </CopyButton>
       </div>
     </section>

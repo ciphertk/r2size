@@ -24,10 +24,10 @@ describe('CalculatorScreen with the M1 worked examples', () => {
     render(<CalculatorScreen initial={{ ...fixture('mockup'), symbol: 'raymond' }} />);
     const panel = result();
     expect(within(panel).getByText('2,758')).toBeInTheDocument();
-    expect(panel).toHaveTextContent('RAYMOND @ 100.00 SL 93.00');
+    expect(panel).toHaveTextContent('RAYMOND @ 100.00 · SL 93.00');
     expect(panel).toHaveTextContent('₹19,995.501.00%');
     expect(panel).toHaveTextContent('₹2,75,800.0013.79%');
-    expect(panel).toHaveTextContent('₹7.25incl. ₹0.25 cost');
+    expect(panel).toHaveTextContent('₹7.25incl. ₹0.25');
     const ladder = within(panel).getByRole('table', { name: 'Scenarios, not forecasts' });
     expect(within(ladder).getByRole('row', { name: /^\+1R/ })).toHaveTextContent('+18,616.50');
     expect(within(ladder).getByRole('row', { name: /^T1/ })).toHaveTextContent('+50,057.70');
@@ -36,7 +36,7 @@ describe('CalculatorScreen with the M1 worked examples', () => {
 
   it('names a binding cap and the uncapped quantity', () => {
     render(<CalculatorScreen initial={fixture('cash cap binds')} />);
-    expect(result()).toHaveTextContent('Limited by available cash · uncapped 4,444');
+    expect(result()).toHaveTextContent('Cash cap · 4,444 uncapped');
     expect(within(result()).getByText('2,493')).toBeInTheDocument();
   });
 
@@ -86,7 +86,7 @@ describe('typing', () => {
     await user.click(screen.getByRole('radio', { name: 'ATR ×' }));
     await user.type(screen.getByLabelText('ATR', { exact: true }), '7.33');
     await user.type(screen.getByLabelText('ATR multiple'), '1.5');
-    expect(screen.getByText('501.35')).toBeInTheDocument();
+    expect(screen.getByText('501.35', { selector: 'output b' })).toBeInTheDocument();
     expect(screen.getByText(/stop rounded down to the tick/)).toBeInTheDocument();
   });
 });

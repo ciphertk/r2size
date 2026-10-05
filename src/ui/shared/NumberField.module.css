@@ -1,90 +1,100 @@
+/* A property row: label column, then the value underlined in --field-border (>= 3:1). */
 .field {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--s-3);
+  min-height: 44px;
+}
+
+.labelCell {
   display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
+  align-items: center;
+  gap: var(--s-1);
   min-width: 0;
 }
 
-.labelRow {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  min-height: 20px;
-}
-
 .label {
-  font-size: 13px;
   color: var(--text-2);
 }
 
 .control {
-  position: relative;
   display: flex;
   align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 36px;
+  border-bottom: 1px solid var(--field-border);
+  transition: border-color 150ms ease;
 }
 
+.control:focus-within {
+  border-bottom-color: var(--accent-text);
+  box-shadow: 0 1px 0 var(--accent-text);
+}
+
+.field[data-invalid] .control {
+  border-bottom-color: var(--loss);
+}
+
+.unit {
+  flex: none;
+  color: var(--text-3);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* The value is as wide as what's typed, so its unit sits right beside it. */
 .input {
-  width: 100%;
-  min-height: 48px;
-  padding: 0 var(--s-3);
-  background: var(--field);
-  border: 1px solid var(--field-border);
-  border-radius: var(--r-2);
-  /* >= 16px stops iOS Safari zooming on focus */
-  font-size: 20px;
-  font-variant-numeric: tabular-nums lining-nums slashed-zero;
-  transition: border-color 0.12s;
+  field-sizing: content;
+  min-width: 3ch;
+  max-width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 16px; /* >= 16px: phones don't zoom on focus */
+  font-weight: 500;
 }
 
 .input::placeholder {
   color: var(--text-3);
-  opacity: 1;
+  font-weight: 400;
 }
 
-.input:hover {
-  border-color: var(--text-3);
+.input:focus,
+.input:focus-visible {
+  outline: none; /* the row's underline is the focus indicator */
 }
 
-.input:focus {
-  outline: none;
-  border-color: var(--focus);
-  box-shadow: 0 0 0 1px var(--focus);
+/* Browsers without field-sizing: the input fills the row and the unit moves to the end. */
+@supports not (field-sizing: content) {
+  .input {
+    flex: 1;
+    width: 100%;
+  }
 }
 
-.invalid,
-.invalid:hover {
-  border-color: var(--loss);
-}
-
-.withPrefix {
-  padding-left: 28px;
-}
-
-.withSuffix {
-  padding-right: 36px;
-}
-
-.prefix,
-.suffix {
-  position: absolute;
+.trail {
+  flex: none;
+  margin-left: auto;
+  font: 500 13px/1 var(--font-mono);
   color: var(--text-3);
-  font-size: 15px;
-  pointer-events: none;
+  white-space: nowrap;
 }
 
-.prefix {
-  left: var(--s-3);
-}
-
-.suffix {
-  right: var(--s-3);
+.messages {
+  grid-column: 2;
+  padding: 4px 0 6px;
 }
 
 .hint,
 .warning,
 .error {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .hint {
@@ -97,4 +107,10 @@
 
 .error {
   color: var(--loss);
+}
+
+@media (max-width: 380px) {
+  .field {
+    grid-template-columns: 100px minmax(0, 1fr);
+  }
 }

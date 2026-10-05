@@ -1,44 +1,87 @@
+/*
+ * Narrow: setup · ladder · fields · order, one column, with the phone dock.
+ * Wide (>= 1100px): three panes. Setup and ladder share the width equally; the order card is
+ * a narrow 320px read-and-copy column. Setup and order scroll on their own.
+ */
 .screen {
-  /* Room for the fixed dock on phones */
-  padding-bottom: 104px;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom)); /* room for the dock */
 }
 
 .layout {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-6);
-  max-width: 1080px;
+  display: grid;
+  grid-template-areas: 'setup' 'ladder' 'fields' 'result';
+  gap: var(--s-4);
+  max-width: 720px;
   margin: 0 auto;
-  padding: 0 var(--s-4) var(--s-4);
+  padding: var(--s-4);
 }
 
-.inputs {
+.setup {
+  grid-area: setup;
   display: flex;
   flex-direction: column;
-  gap: var(--s-5);
+  gap: var(--s-3);
+  min-width: 0;
+}
+
+.ladder {
+  grid-area: ladder;
+  min-width: 0;
+}
+
+.fields {
+  grid-area: fields;
   min-width: 0;
 }
 
 .result {
+  grid-area: result;
   min-width: 0;
 }
 
-@media (min-width: 880px) {
+@media (min-width: 1100px) {
   .screen {
-    padding-bottom: var(--s-6);
+    padding-bottom: 0;
   }
 
   .layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
-    gap: var(--s-6);
-    padding: 0 var(--s-5);
+    grid-template-areas:
+      'setup ladder result'
+      'fields ladder result';
+    grid-template-columns: minmax(340px, 1fr) minmax(340px, 1fr) 320px;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0;
+    max-width: none;
+    height: calc(100dvh - var(--header));
+    padding: 0;
+  }
+
+  .setup,
+  .fields {
+    padding-right: var(--s-5);
+    padding-left: var(--s-5);
+    border-right: 1px solid var(--hair);
+  }
+
+  .setup {
+    padding-top: var(--s-5);
+    padding-bottom: var(--s-4);
+  }
+
+  .fields {
+    overflow-y: auto;
+    padding-bottom: var(--s-6);
+    overscroll-behavior: contain;
+  }
+
+  .ladder {
+    min-height: 0;
   }
 
   .result {
-    position: sticky;
-    top: var(--s-5);
-    align-self: start;
-    padding-top: var(--s-5);
+    overflow-y: auto;
+    padding: var(--s-5) var(--s-4);
+    border-left: 1px solid var(--hair);
+    overscroll-behavior: contain;
   }
 }

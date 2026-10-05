@@ -26,6 +26,7 @@ export function PresetChips({ presets, form, onApply, onNew }: PresetChipsProps)
             aria-pressed={selected}
             onClick={() => onApply(preset)}
           >
+            <span className={styles.dot} aria-hidden="true" />
             {preset.name} <span className={styles.detail}>{riskLabel(preset)}</span>
           </button>
         );

@@ -14,6 +14,9 @@ export function App() {
   return (
     <>
       <header className={styles.bar}>
+        <span className={styles.mark} aria-hidden="true">
+          R2
+        </span>
         <span className={styles.wordmark}>R2Size</span>
         <span className={styles.tagline}>Position size · NSE cash · long only</span>
         <button

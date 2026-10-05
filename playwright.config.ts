@@ -16,6 +16,15 @@ export default defineConfig({
       use: { ...devices['Pixel 7'], permissions: ['clipboard-read', 'clipboard-write'] },
     },
     { name: 'iphone-14', use: { ...devices['iPhone 14'] } },
+    {
+      // The three-pane layout only appears from 1100px.
+      name: 'desktop',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
+        permissions: ['clipboard-read', 'clipboard-write'],
+      },
+    },
   ],
   webServer: {
     command: 'pnpm build && pnpm preview --port 4173 --strictPort',

@@ -38,7 +38,7 @@
 
 .pair {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr; /* row-style fields need the full width */
   gap: var(--s-3);
   align-items: end;
 }

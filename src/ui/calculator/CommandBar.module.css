@@ -1,0 +1,165 @@
+.command {
+  border: 1px solid var(--line);
+  border-radius: var(--r-4);
+  background: var(--surface);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.command:focus-within {
+  border-color: color-mix(in oklab, var(--accent) 70%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 0 var(--s-2) 0 var(--s-3);
+}
+
+.prompt {
+  font: 600 16px/1 var(--font-mono);
+  color: var(--accent-text);
+}
+
+/* The coloured overlay and the real input share one box; the input's own text is invisible. */
+.stack {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+}
+
+.overlay,
+.input {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  font: 400 16px/44px var(--font-mono);
+  letter-spacing: 0;
+  white-space: pre;
+}
+
+.overlay {
+  overflow: hidden;
+  color: var(--text);
+  pointer-events: none;
+}
+
+.overlay [data-role='symbol'] {
+  font-weight: 600;
+}
+
+.overlay [data-role='keyword'] {
+  color: var(--text-3);
+}
+
+.overlay [data-role='number'] {
+  color: var(--accent-text);
+}
+
+.overlay [data-role='unknown'] {
+  color: var(--loss);
+  text-decoration: underline wavy color-mix(in oklab, var(--loss) 60%, transparent);
+  text-underline-offset: 4px;
+}
+
+.input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text);
+}
+
+.input:focus,
+.input:focus-visible {
+  outline: none; /* the bar's ring is the focus indicator */
+}
+
+.input::placeholder {
+  color: var(--text-3);
+}
+
+.input::selection {
+  background: color-mix(in oklab, var(--accent) 45%, transparent);
+  color: transparent;
+}
+
+.kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  background: var(--raised-2);
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+@media (hover: none) {
+  .kbd {
+    display: none;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 34px;
+  padding: 0 var(--s-3) var(--s-2) 30px;
+}
+
+.chips:empty {
+  display: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--raised);
+  font: 500 12px/1 var(--font-mono);
+  animation: chipIn 160ms var(--ease-out);
+}
+
+@keyframes chipIn {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+}
+
+.done {
+  border-color: color-mix(in oklab, var(--gain) 40%, transparent);
+  color: var(--gain);
+}
+
+.chipLabel {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  color: var(--text-3);
+}
+
+.help {
+  align-self: center;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.help code {
+  padding: 1px 4px;
+  border-radius: var(--r-1);
+  background: var(--raised-2);
+  font: 400 11px/1.4 var(--font-mono);
+  color: var(--text-2);
+}

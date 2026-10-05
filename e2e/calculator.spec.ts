@@ -27,8 +27,8 @@ test('sizes the mockup setup exactly (M1 worked example)', async ({ page }) => {
 
   const result = ticket(page);
   await expect(result.locator('#ticket-qty')).toContainText('2,758');
-  await expect(result).toContainText('Limited by risk budget');
-  await expect(result).toContainText('RAYMOND @ 100.00 SL 93.00');
+  await expect(result).toContainText('Risk-bound');
+  await expect(result).toContainText('RAYMOND @ 100.00 · SL 93.00');
   await expect(result).toContainText('₹19,995.50');
   await expect(result).toContainText('1.00%');
   await expect(result).toContainText('₹2,75,800.00');
@@ -44,23 +44,23 @@ test('sizes the mockup setup exactly (M1 worked example)', async ({ page }) => {
 test('shows the derived stop and tick while typing, before equity is known', async ({ page }) => {
   await page.getByLabel('Entry', { exact: true }).fill('200');
   await page.getByLabel('Stop % below entry').fill('5');
-  await expect(page.getByText(/Stop\s*190\.00/)).toBeVisible();
+  await expect(page.locator('output', { hasText: /Stop\s*190\.00/ })).toBeVisible();
   await expect(page.getByText(/Tick 0\.01 · NSE estimate/)).toBeVisible();
   await expect(ticket(page)).toContainText('Still needed: Equity, Risk % of equity.');
 });
 
 test('copies plain digits for the broker, and the summary line', async ({ page, browserName }) => {
   await enterMockupSetup(page);
-  const copyQty = ticket(page).getByRole('button', { name: /Copy qty|Copied/ });
+  const copyQty = ticket(page).getByRole('button', { name: 'Copy quantity' });
   await copyQty.click();
   await expect(copyQty).toContainText('Copied ✓');
   if (browserName === 'chromium') {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('2758');
-    await ticket(page).getByRole('button', { name: 'All', exact: true }).click();
+    await ticket(page).getByRole('button', { name: 'Copy order line' }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       'RAYMOND · BUY 2,758 · LMT ₹100.00 · SL ₹93.00 · TGT ₹118.40',
     );
-    await ticket(page).getByRole('button', { name: 'T1', exact: true }).click();
+    await ticket(page).getByRole('button', { name: 'Copy target 1' }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('118.40');
   }
 });
@@ -118,7 +118,7 @@ test('time to copy stays well inside the 15 s budget (scripted regression guard)
   const copy = page
     .getByRole('region', { name: 'Quick copy' })
     .or(ticket(page))
-    .getByRole('button', { name: /Copy qty|Copied/ })
+    .getByRole('button', { name: /Copy quantity|Copied/ })
     .first();
   await copy.click();
   await expect(copy).toContainText('Copied ✓');

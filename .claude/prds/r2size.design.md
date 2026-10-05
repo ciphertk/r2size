@@ -1,168 +1,106 @@
-# R2Size — Design Direction
+# R2Size — Design Direction: "Three-pane Workbench"
 
-*Status: ACCEPTED (2026-10-05). Dark theme only. Mockup: [`design/mockup.html`](../../design/mockup.html) + `design/mockup.css` (open locally in a browser). Related: [r2size.prd.md](r2size.prd.md), [r2size.architecture.md](r2size.architecture.md).*
+*Status: ACCEPTED (2026-10-05, v2). Dark theme only. Related: [r2size.prd.md](r2size.prd.md), [r2size.architecture.md](r2size.architecture.md).*
+
+*History: v1 ("graphite order ticket": IBM Plex, warm graphite, no accent hue, two columns; mockup in `design/mockup.html`) was built in M2–M3. On 2026-10-05 the owner judged it "not good" and asked for a redesign. Prototype rounds compared Terminal, Native, Workbench, Sentence, Ladder, Living table, Price rail and Three-pane variants. The owner chose **Three-pane**: Workbench's command bar and property list, plus a draggable price ladder. v1's typography and colour rules below are replaced; its number rules, accessibility rules and component choices still stand.*
 
 ## Direction
 
 - **Purpose:** turn a setup into a copied quantity in under 15 seconds, without mistakes.
-- **Audience:** a swing trader at the moment of execution, often on a phone, usually after market hours or with a chart open beside it.
-- **Tone:** a quiet instrument, like an order ticket on a trading desk at night. It's dense, calm and precise, with no decoration.
+- **Audience:** a swing trader at the moment of execution, at a desk with a chart open or on a phone after hours.
+- **Tone:** a precise desktop tool in the Linear mould. It is keyboard-first and dense, with hairline structure and one quiet accent.
 - **The memorable details:**
-  1. **The quantity is the hero.** "2,758 shares" is set big in tabular figures, like a printed ticket.
-  2. **The R table is a price ladder.** Rows run top to bottom from +3R down to the stop, with a coloured rail on the left: green above entry, paper-white at entry, vermilion at the stop. It reads like a chart's price axis.
-  3. **Colour means something or it isn't there.** The interface is graphite and paper. Colour appears only for gain, loss and caution.
+  1. **One typed line fills the form.** `tcs 4012.50 sl 3890 risk 1%`: the command bar colours what it understood and previews each clause as a chip before Enter.
+  2. **The trade is drawn, and the drawing is an input.** Stop, entry and target are lines on a price axis. Drag them (snapped to the NSE tick) or nudge them with ↑↓. Hover below entry to preview "stop here → N shares", then click to place it.
+  3. **The quantity is the hero.** The order card shows it large, then exactly what each copy action will put on the clipboard, each with its shortcut key (C / E / S / T / A).
 
-## Anti-slop rules (enforced in review)
+## Rules (enforced in review)
 
 | Don't | Do instead |
 |---|---|
-| Purple, indigo or blue-violet accents, gradients, glows | No accent hue at all. The primary action is paper-white on graphite |
-| Tailwind slate/zinc greys, pure `#000` backgrounds | Warm graphite neutrals (hue ~60–80, very low chroma) |
-| Inter, Geist or Space Grotesk (the default "AI app" faces) | IBM Plex Sans + IBM Plex Mono (see Typography) |
-| Glassmorphism, blur, drop-shadow cards, cards inside cards | One bordered "ticket" surface; everything else sits flat on the background, separated by hairlines |
-| Emoji, sparkles, illustrations, vague hero copy | Labels that name the thing ("Entry", "Stop", "Risk"); no marketing copy in the app |
-| Pill-shaped everything, 16 px+ radii | 4–6 px radii, rectangular chips |
-| Tooltip-on-hover only | Info buttons that open a popover with a Guide link (works on touch) |
-| Decorative animation | Only 120 ms colour/border transitions on interaction, disabled under `prefers-reduced-motion` |
-| shadcn/ui default look | Headless primitives (Base UI) styled with our own tokens |
+| A second accent, gradients, glows | One indigo accent (`--accent`) on under 5% of pixels: the R2 mark, focus, the active preset dot, the command prompt |
+| Colour as decoration | Green and red only for money and the risk / reward zones; amber only for caution |
+| Cards inside cards, drop shadows | One bordered order card; everything else sits flat, separated by hairlines |
+| Pure `#000`, cold slate greys | Warm near-black `#08090a` and neutral greys |
+| Hover-only affordances | Hover styles only under `(hover: hover) and (pointer: fine)`; every action works by tap and keyboard |
+| Decorative or slow motion | Ease-out `cubic-bezier(0.23, 1, 0.32, 1)`, under 300 ms, transform / opacity / blur only; `scale(0.97)` on press; nothing animates on keyboard-repeated changes |
+| Tooltips on hover | Info buttons that open a popover (Base UI) |
+| Marketing copy, emoji | Labels that name the thing ("Entry", "Stop", "Risk") |
 
 ## Typography
 
-**Choice: IBM Plex Sans (UI and all numbers) + IBM Plex Mono (ticket line, symbol, R-table labels, wordmark).** Both are open source (OFL), from [github.com/IBM/plex](https://github.com/IBM/plex).
+**Geist (UI) + Geist Mono (numbers in the command bar, ladder, order line, shortcuts).** OFL, from [vercel/geist-font](https://github.com/vercel/geist-font), v1.7.2.
 
-**Why: checked by inspecting the font files, not taken from blogs.** I downloaded 24 open-source candidates from the Google Fonts repo and checked their glyph tables with fontTools:
+- **Why now:** v1 rejected Geist as "the Vercel look". The owner then chose a Linear-style workbench, where Geist is the native voice. Its ₹ glyph is present, verified with fontTools.
+- **Trade-offs:**
+  - Geist's digits are proportional by default, so `tabular-nums` is set on `body` and every number aligns.
+  - Geist has no slashed zero, so `0` and `O` rely on context. Numbers never sit next to capital O in this UI.
+- **Delivery:** self-hosted, so no Google Fonts request (CSP `font-src 'self'`). Both fonts are variable, cut to wght 400–600 with fontTools `instancer`.
+  - **Subset:** Basic Latin, ₹, −, ×, ·, arrows, ⇧, ▴▾, dashes and quotes. ✓ falls back to a system font.
+  - **Sizes:** `geist-var-400-600.woff2` is 11.9 KB and `geistmono-var-400-600.woff2` 8.8 KB, about 21 KB together against the 30 KB budget. The licence is in `src/assets/fonts/OFL-Geist.txt`.
 
-| Font | ₹ glyph | Digits equal-width by default | Slashed zero (`zero`) | Verdict |
-|---|---|---|---|---|
-| **IBM Plex Sans** | ✓ | ✓ | ✓ | **Chosen.** Clear `I l 1` and `0 O` distinction; numbers align in columns with no CSS needed |
-| **IBM Plex Mono** | ✓ | ✓ | ✓ | **Chosen** as the companion |
-| Inter | ✓ | ✗ (needs `tnum`) | ✓ | Rejected: the default AI-app face; `I` and `l` are identical |
-| Geist / Geist Mono | ✓ | ✗ / ✓ | ✗ | Rejected: the Vercel/shadcn look; no slashed zero |
-| Fragment Mono | ✓ | ✓ | ✓ | Runner-up for the mono role |
-| Schibsted Grotesk, Mona Sans, Hubot Sans, Public Sans, Manrope, Figtree | ✓ | ✗ | mixed | Proportional digits by default; fine faces, weaker for numbers |
-| JetBrains Mono, Martian Mono, DM Mono, Red Hat Mono, Spline Sans Mono, Azeret Mono | **✗** | ✓ | mixed | **Rejected: no ₹.** The rupee would fall back to a different font mid-number |
-| Recursive | ✓ | ✓ | ✓ | Rejected: 2.3 MB source, too heavy |
-
-**Bonus:** the Plex family includes IBM Plex Sans Devanagari, which leaves a clean path to Hindi and other regional languages (a Phase 2 candidate).
-
-**Delivery (self-hosted, no Google Fonts request, CSP `font-src 'self'`):**
-- **Subset:** Basic Latin, ₹, ×, −, en/em dash, arrows, ≤ ≥, ✓, curly quotes.
-- **Plex Sans:** variable, weights 400–600, 18 KB woff2 (`design/fonts/plexsans-var-400-600.woff2`).
-- **Plex Mono:** Regular, 8 KB woff2 (`design/fonts/plexmono-400.woff2`).
-- **Total ≈ 26 KB.** Preload the Plex Sans file; use `font-display: swap`; keep the system fallbacks `system-ui` and `ui-monospace`.
-- **Kept OpenType features:** `kern liga calt tnum lnum zero case ss01–03`.
-
-**Number rules:**
-- Every number uses `font-variant-numeric: tabular-nums lining-nums slashed-zero`, so digits never jitter as you type and columns align.
-- Minus is U+2212 (−), not a hyphen. Multiplication is ×.
-- Money shows 2 decimals, quantities none. Indian grouping comes from `Intl.NumberFormat('en-IN')`.
+**Number rules (unchanged from v1):**
+- Minus is U+2212 (−); multiplication is ×.
+- Money shows 2 decimals, quantities none.
+- Indian grouping comes from `Intl.NumberFormat('en-IN')`.
 - Typed values are never reformatted while the field has focus.
 
 **Type scale (px):**
 
-| Role | Size / weight | Font |
-|---|---|---|
-| Quantity (ticket) | `clamp(52, 15vw, 72)` / 500, tracking −2% | Plex Sans |
-| Quantity (mobile dock) | 26 / 500 | Plex Sans |
-| Input values | 20 / 400 | Plex Sans (symbol field in Plex Mono, uppercase) |
-| Facts, ladder, body | 14–16 / 400 | Plex Sans |
-| Labels | 13 / 400, `--text-2` | Plex Sans |
-| Meta, hints, captions | 12 / 400, `--text-3` | Plex Sans |
-| Ticket line, ladder levels, BUY tag | 12–14 / 400 | Plex Mono |
+| Role | Size / weight |
+|---|---|
+| Quantity (order card) | `clamp(44, 5vw, 60)` / 600, tracking −3.5% |
+| Quantity (phone dock) | 24 / 600 |
+| Input values, command line | 16 / 500, so phones don't zoom on focus |
+| Body, labels | 14 / 400 |
+| Facts, copy actions | 13 |
+| Section titles, hints, captions | 12, `--text-3` |
+| Order line, ladder tags, shortcut keys | 10–13, Geist Mono |
 
 ## Colour (dark only)
 
-Neutrals are warm graphite with paper-white text. Contrast ratios were computed with the WCAG formula.
-
-| Token | Hex | Use | Contrast |
-|---|---|---|---|
-| `--bg` | `#121110` | Page | — |
-| `--surface` | `#1a1916` | Ticket, dock | — |
-| `--raised` | `#23211d` | Selected segment, hover | — |
-| `--field` | `#0d0c0b` | Input wells (recessed, darker than the page) | — |
-| `--line` | `#36332d` | Hairlines, dividers (decorative) | — |
-| `--field-border` | `#706a5e` | Input, segment and button borders | ≥ 3.0:1 on every surface (WCAG 1.4.11) |
-| `--text` | `#ece6d9` | Primary text; primary-button fill | 12.9–15.7:1 |
-| `--text-2` | `#aba392` | Labels, secondary | 6.4–7.8:1 |
-| `--text-3` | `#948c7c` | Meta, hints, captions | ≥ 4.8:1 on every surface |
-| `--gain` | `#6cc08e` | BUY tag, positive P&L, ladder rail above entry | ≥ 7.3:1 |
-| `--loss` | `#ef7a5e` | Stop price, negative P&L, stop rail (vermilion, not pink) | ≥ 5.8:1 |
-| `--caution` | `#e8b04a` | Stale profile, tick near a band edge, off-tick warnings | ≥ 8.2:1 |
-| `--focus` | `#9cc3e6` | Focus ring only (the one cool hue, so focus is never confused with meaning) | ≥ 8.7:1 |
+| Token | Value | Use |
+|---|---|---|
+| `--bg` | `#08090a` | Page |
+| `--surface` → `--raised-3` | `#101113` `#16171c` `#1e1f25` `#26272e` | Order card, command bar, chips, hover, kbd |
+| `--hair` / `--line` | white at 7% / 12% | Dividers; chip and card borders (decorative) |
+| `--field-border` | `#5d6270` | The underline under every editable value (≥ 3:1, WCAG 1.4.11) |
+| `--text` / `--text-2` / `--text-3` | `#f7f8f8` / `#a8aebb` / `#858b98` | Primary / labels / meta (`--text-3` ≥ 4.5:1 on every surface) |
+| `--accent` / `--accent-text` | `#5e6ad2` / `#9aa3f5` | Mark and fills / accent text, focus ring, numbers in the command line |
+| `--gain` / `--loss` / `--caution` | `#4cb782` / `#eb5757` / `#f2c94c` | Money, zones, warnings |
 
 **Rules:**
-- **The primary button is `--text` on `--bg`** (15:1), not a coloured fill. There is one primary button per view.
-- **Gain and loss are never shown by colour alone.** Every value carries a sign (+ / −), and the ladder rows are labelled.
-- **No alpha-blended text.** Every text colour is solid, so its contrast can be verified.
-- **Browser chrome:** `<meta name="color-scheme" content="dark">` and `theme-color #121110`. No light theme and no theme toggle.
+- The primary action (Copy quantity) is `--text` on `--bg`, never a coloured fill.
+- Gain and loss always carry a sign (+ / −), never colour alone.
+- `theme-color` is `#08090a`, and there is no light theme.
 
 ## Layout
 
-**Mobile (≤ 879 px): inputs first, result docked.**
-1. **Top bar:** "R2Size" wordmark (Plex Mono), Guide link, settings button.
-2. **Profile strip:** equity, cash and "Updated N days ago" (caution colour when stale), plus an Update button.
-3. **Preset chips:** a single row that scrolls sideways. The selected chip has a paper border.
-4. **Inputs:**
-   - Symbol and Entry share a row.
-   - Stop: method as a segmented control, then the value with the derived stop shown in vermilion beside it, then the tick hint.
-   - Risk: unit as a segmented control, then the value.
-   - "Limits, costs & targets" is a disclosure.
-5. **Ticket:** facts and the full set of copy buttons.
-6. **Price ladder,** then the gap-risk note.
-7. **Fixed bottom dock:** "BUY 2,758 · risk ₹19,995.50" and a **Copy qty** button within thumb reach. It updates live while you type, so the 15-second path is preset → entry → stop → Copy without scrolling. It respects `safe-area-inset-bottom`.
+**Wide (≥ 1100 px): three panes**, filling the viewport under a 48 px header.
 
-**Desktop (≥ 880 px):** two columns, max 1080 px wide. Inputs on the left. The ticket and ladder sit in a 440 px column on the right that stays in place as you scroll. The dock is hidden.
+| Setup (`minmax(340px, 1fr)`) | Ladder (`minmax(340px, 1fr)`) | Order (`320px`) |
+|---|---|---|
+| Notices, command bar, presets; then the property list (Trade · Risk · Account · Limits), scrolling on its own | The price axis at full height | The order card, a scenarios note and the setup link, scrolling on its own |
 
-**Spacing and touch:**
-- Spacing scale is 4 / 8 / 12 / 16 / 24 / 32.
-- Inputs and buttons are ≥ 48 px tall; chips 36 px (within a 44 px tap area including the gap); icon buttons 44 px.
+The setup and ladder panes are always equal widths; the owner rejected both a wide ladder and a wide setup column. The order pane stays narrow because you only read and copy there.
 
-**Ticket anatomy:**
-- BUY tag (left) and the binding constraint (right).
-- The quantity.
-- Mono ticket line: `RAYMOND @ 100.00 SL 93.00`.
-- A dashed tear line, then a 2 × 2 facts grid: Risk, Investment, Risk/share, Cap room.
-- A full-width **Copy qty** button, then four equal buttons: Entry, Stop, T1, All.
+**Narrow (< 1100 px): one column, max 720 px.** Command bar and presets, then the ladder as a collapsible card (open by default, 340 px tall), then the property list, then the order card. A fixed bottom dock shows "BUY 2,758 · risk ₹…" and a Copy quantity button, and respects `safe-area-inset-bottom`.
 
-## Components: open source, headless, styled by us
+**Property row:** a 120 px label column, then the value with its units beside it, sized to its content via `field-sizing: content`. Browsers without `field-sizing` fill the row instead. The value sits on a `--field-border` underline, and focus turns that underline indigo. Enter moves to the next field. A short visible label ("Stop") pairs with a full accessible name ("Stop % below entry").
 
-The architecture's strict CSP (`style-src 'self'`, Trusted Types) rules out libraries that inject `<style>` tags or CSS-in-JS at runtime. That decided the choice.
+## Components
 
-| Need | Component | Source | Notes |
-|---|---|---|---|
-| Info tips (glossary popovers) | `Popover` | **Base UI** — [github.com/mui/base-ui](https://github.com/mui/base-ui) (MIT) | Opens on tap or click, not hover |
-| Reset confirmation | `AlertDialog` | Base UI | |
-| Import preview, preset editor, settings sheet | `Dialog` | Base UI | |
-| "Copied ✓" confirmation, update-available banner | `Toast` | Base UI | The update toast stays until dismissed |
-| "Limits, costs & targets" disclosure | `Collapsible` | Base UI | Or native `<details>`, as in the mockup |
-| Stop method, risk unit, preset chips | `RadioGroup` / `ToggleGroup` | Base UI | Real radio semantics, arrow-key navigation |
-| Icons | Phosphor Icons | [github.com/phosphor-icons/react](https://github.com/phosphor-icons/react) (MIT) | Regular weight, 20 px, per-icon imports; about 6 icons total (settings, info, copy, check, plus, warning) |
-| Numeric inputs | **Our own `NumberField`** on a native `<input inputmode="decimal">` | — | Base UI's `NumberField` and React Aria's `NumberField` both parse to a JS float, which breaks the engine's exact-decimal rule (ADR-002) |
-| Preset picker on mobile | Chips (above) | — | Faster than a dropdown for 2–5 presets |
+| Part | Notes |
+|---|---|
+| Command bar | `state/command.ts` parses the line. A transparent input sits over a coloured token overlay. Chips preview the clauses, then turn green once applied. ↑ recalls the last line, Esc clears, `/` focuses. Unknown words get a red squiggle and change nothing. Equity and cash typed here are saved like the fields |
+| Price ladder | `use-ladder.ts` + `LadderPane`. Stop, entry and target are `role="slider"` lines named "Stop line", "Entry line" and "Target line". Pointer drags track 1:1 on a scale frozen for the drag. ↑↓ moves one tick, ⇧ or PageUp/PageDown moves 10. Values are built from whole paise. Moving the stop switches it to a price. Hover preview and click-to-place work only with a mouse, so a stray tap on a phone never moves a line |
+| Order card | Badge (Risk-bound / Allocation cap / Cash cap · N uncapped), quantity, order line, facts. Copy actions each show their value and kbd; the kbd is hidden on touch. Shortcuts are ignored in fields, sliders and dialogs. A visually hidden scenarios table gives screen readers the R levels the ladder draws |
+| Pills, presets, info tips, dialogs | Base UI `RadioGroup` / `Popover` / `Dialog`, inside `CSPProvider disableStyleElements` (unchanged from v1) |
 
-**Base UI setup:** wrap the app in `<CSPProvider disableStyleElements>` (from `@base-ui/react/csp-provider`). We don't use `ScrollArea` or the `Select` option that aligns the list with its trigger (`alignItemWithTrigger`), which are the only parts that inject `<style>`. Base UI sets positioning through `element.style` (the CSSOM), which `style-src 'self'` allows.
+## States
 
-**Why not the alternatives:**
-- **Radix Primitives:** `Select` and `ScrollArea` inject `<style>` through `dangerouslySetInnerHTML`. That breaks `style-src 'self'` and Trusted Types (radix-ui/primitives #2057, #3117).
-- **shadcn/ui:** requires Tailwind and produces the most recognisable "AI app" look.
-- **React Aria:** excellent accessibility, but larger per component, and its `NumberField` uses floats.
-- **MUI, Mantine, Chakra:** runtime CSS-in-JS or large bundles.
-
-## States to design in implementation
-
-- **Empty (first run):** the profile strip says "Add your equity to start". The ticket shows "—" and a one-line hint. The dock is hidden until there's a quantity.
-- **Error:**
-  - The field border turns `--loss` and a message sits below the field (`aria-describedby`).
-  - A zero quantity shows its cause in the ticket ("Risk budget too small for 1 share at this stop"), and the quantity shows "0" in `--text-3`.
-- **Capped:** the binding constraint reads "Limited by cash · uncapped 4,120" in `--caution`.
-- **Near band edge:** the tick hint turns `--caution`: "Tick 0.05 · near ₹250 band edge — check your broker".
-- **Copied:** the button label swaps to "Copied ✓" for 1.5 s and a polite live region announces it. No toast is needed for copies on mobile.
-
-## Changes this makes to the architecture
-
-- **Dark only:**
-  - remove the theme setting, `theme-init.js` and `light-dark()`
-  - `settings.theme` is dropped from `StoredDocV1`
-  - `color-scheme: dark` is set in CSS and in a meta tag
-- **Self-hosted subset fonts (≈ 26 KB):** this replaces "no web fonts". The CSS budget stays ≤ 15 KB; the fonts get their own ≤ 30 KB budget.
-- **Base UI + Phosphor added to the stack;** Base UI runs inside `CSPProvider disableStyleElements`.
+- **Empty:** a dashed order card says "Your quantity appears here", lists what is still needed and suggests a command line. The ladder says "Enter an entry and a stop to draw the trade".
+- **Error:** the field's underline turns `--loss` and a message sits below it (`aria-describedby`). A zero quantity explains its cause in the card.
+- **Capped:** the badge turns amber: "Cash cap · 4,444 uncapped".
+- **Near band edge:** the tick note turns amber.
+- **Copied:** the action's label cross-fades to "Copied ✓" for 1.4 s, and a polite live region announces it.

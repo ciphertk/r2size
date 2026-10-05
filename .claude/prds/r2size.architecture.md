@@ -21,8 +21,8 @@ The sizing-rule decisions (D1–D12) are in [section 11](#11-sizing-decisions-an
 | Language | TypeScript 6.0, strict, with `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes` | The engine's types are its contract. Not 7.x yet: typescript-eslint and Stryker's checker need the classic compiler | JS + JSDoc (weaker guarantees for the engine) |
 | UI | **React API on Preact** (`react` = `npm:@preact/compat`, since M2: React 19 + Base UI was 115 KB gzipped, Preact 59 KB), with no state, form or router libraries | One screen plus a Guide page. `useReducer`, `useSyncExternalStore` and a ~30-line path switch cover it | Preact (fallback: alias `react` to `preact/compat` if the JS budget is exceeded; only `src/ui` touches React). Svelte/Solid (reopens a decided question). Vanilla/Lit (more hand-written DOM code). Next.js/Astro (server/static rendering adds nothing) |
 | Build | **Vite** (current major) | Fast, first-class PWA plugin, emits no inline scripts | webpack, Parcel |
-| Styling | Plain CSS with custom properties and CSS Modules, **dark theme only** (`color-scheme: dark`), tokens from [r2size.design.md](r2size.design.md), `font-variant-numeric: tabular-nums slashed-zero` | No runtime cost, works under `style-src 'self'` | Tailwind (one more toolchain), CSS-in-JS (needs a runtime and fights the security policy) |
-| Fonts | **IBM Plex Sans** (variable 400–600) + **IBM Plex Mono** (400), subset to Latin + ₹ + symbols, self-hosted woff2 (≈ 26 KB total) | ₹ glyph, digits equal-width by default, slashed zero; verified with fontTools (see design doc) | Inter, Geist (generic look; Inter needs `tnum`), JetBrains/Martian/DM/Red Hat Mono (no ₹) |
+| Styling | Plain CSS with custom properties and CSS Modules, **dark theme only** (`color-scheme: dark`), tokens from [r2size.design.md](r2size.design.md), `font-variant-numeric: tabular-nums` | No runtime cost, works under `style-src 'self'` | Tailwind (one more toolchain), CSS-in-JS (needs a runtime and fights the security policy) |
+| Fonts | **Geist** + **Geist Mono** (variable, cut to 400–600), subset to Latin + ₹ + symbols, self-hosted woff2 (≈ 21 KB total) | ₹ glyph verified with fontTools; the native voice of the Workbench direction chosen 2026-10-05 (design doc v2); digits made tabular in CSS | IBM Plex (v1 choice, replaced with the redesign), Inter |
 | UI primitives | **Base UI** (`@base-ui/react`, MIT): Popover, Dialog, AlertDialog, Toast, Collapsible, RadioGroup/ToggleGroup, inside `<CSPProvider disableStyleElements>` | Headless, accessible, can run with no injected `<style>` tags | Radix (Select/ScrollArea inject `<style>`, breaking CSP and Trusted Types), shadcn/ui (Tailwind + generic look), React Aria (heavier; its NumberField uses floats) |
 | Icons | **Phosphor Icons** (`@phosphor-icons/react`, MIT), per-icon imports, about 6 icons | Consistent stroke, tree-shakable | Lucide (the default shadcn look) |
 | Validation of untrusted data | **Valibot** | A few KB after tree-shaking. Used for stored data, backups and URL params | Zod (larger), hand-written checks |
@@ -37,7 +37,7 @@ The sizing-rule decisions (D1–D12) are in [section 11](#11-sizing-decisions-an
 **Budgets, enforced in CI:**
 - Initial JS ≤ 90 KB gzipped (React is about 60 KB).
 - CSS ≤ 15 KB.
-- Fonts ≤ 30 KB woff2 total, self-hosted (subset IBM Plex Sans + Mono); Plex Sans preloaded.
+- Fonts ≤ 30 KB woff2 total, self-hosted (subset Geist + Geist Mono).
 - `build.assetsInlineLimit: 0`, so nothing is inlined as a `data:` URL and `img-src` stays `'self'`.
 
 ## 2. Module and layer layout
@@ -47,7 +47,7 @@ r2size/
   index.html                      # no inline script or style
   public/
     _headers                      # security policy + caching rules
-    fonts/                        # plexsans-var-400-600.woff2, plexmono-400.woff2 (subset)
+    fonts/                        # geist-var-400-600.woff2, geistmono-var-400-600.woff2 (subset), OFL-Geist.txt
     icons/ (192, 512, maskable-512, apple-touch-icon-180), favicon.svg, robots.txt
   src/
     engine/                       # PURE: no DOM, no storage, no Intl, no Number arithmetic on money

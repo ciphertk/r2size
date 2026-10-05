@@ -1,45 +1,58 @@
-/* Design tokens — .claude/prds/r2size.design.md. Dark theme only. */
+/* Design tokens — .claude/prds/r2size.design.md ("Three-pane Workbench"). Dark theme only. */
 @font-face {
-  font-family: 'Plex Sans';
-  src: url('../../assets/fonts/plexsans-var-400-600.woff2') format('woff2');
+  font-family: 'Geist';
+  src: url('../../assets/fonts/geist-var-400-600.woff2') format('woff2');
   font-weight: 400 600;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Plex Mono';
-  src: url('../../assets/fonts/plexmono-400.woff2') format('woff2');
-  font-weight: 400;
+  font-family: 'Geist Mono';
+  src: url('../../assets/fonts/geistmono-var-400-600.woff2') format('woff2');
+  font-weight: 400 600;
   font-display: swap;
 }
 
 :root {
   color-scheme: dark;
 
-  /* Warm graphite neutrals */
-  --bg: #121110;
-  --surface: #1a1916;
-  --raised: #23211d;
-  --field: #0d0c0b;
-  --line: #36332d;
-  --field-border: #706a5e; /* >= 3:1 on every surface (WCAG 1.4.11) */
+  /* Warm near-black surfaces, lightest last */
+  --bg: #08090a;
+  --surface: #101113;
+  --raised: #16171c;
+  --raised-2: #1e1f25;
+  --raised-3: #26272e;
+  --field: #0c0d0f;
 
-  /* Paper text */
-  --text: #ece6d9;
-  --text-2: #aba392;
-  --text-3: #948c7c; /* >= 4.5:1 on every surface */
+  /* Hairlines separate; --field-border marks an editable value (>= 3:1, WCAG 1.4.11) */
+  --hair: rgb(255 255 255 / 0.07);
+  --line: rgb(255 255 255 / 0.12);
+  --field-border: #5d6270;
 
-  /* Colour carries meaning only */
-  --gain: #6cc08e;
-  --loss: #ef7a5e;
-  --caution: #e8b04a;
-  --focus: #9cc3e6;
+  /* Text */
+  --text: #f7f8f8;
+  --text-2: #a8aebb;
+  --text-3: #858b98; /* >= 4.5:1 on every surface */
 
-  --font-ui: 'Plex Sans', system-ui, sans-serif;
-  --font-mono: 'Plex Mono', ui-monospace, monospace;
+  /* One accent, for focus and "active" only (< 5% of pixels) */
+  --accent: #5e6ad2;
+  --accent-text: #9aa3f5;
+  --focus: #9aa3f5;
+
+  /* Colour carries meaning only: money and the risk / reward zones */
+  --gain: #4cb782;
+  --loss: #eb5757;
+  --caution: #f2c94c;
+
+  --font-ui: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 
   --r-1: 4px;
   --r-2: 6px;
+  --r-3: 8px;
+  --r-4: 12px;
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
@@ -47,5 +60,5 @@
   --s-5: 24px;
   --s-6: 32px;
 
-  --wide: 880px;
+  --header: 48px;
 }

@@ -178,3 +178,15 @@ test('dialogs pass axe with no serious or critical issues', async ({ page }) => 
   );
   expect(inEditor).toEqual([]);
 });
+
+// Regression: leaving Equity saved the profile with cash still blank, and the sync for
+// "profile changed elsewhere" then wrote that blank over the cash being typed.
+test('typing equity then cash keeps both', async ({ page }) => {
+  await page.goto('/');
+  const cash = page.getByLabel('Available cash (optional)');
+  await equity(page).fill('2000000');
+  await cash.fill('640000');
+  await page.getByLabel('Symbol').fill('raymond');
+  await expect(cash).toHaveValue('6,40,000');
+  await expect(equity(page)).toHaveValue('20,00,000');
+});

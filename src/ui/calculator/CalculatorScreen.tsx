@@ -15,8 +15,10 @@ import { ProfileStrip } from '../profile/ProfileStrip';
 import { SettingsSheet } from '../settings/SettingsSheet';
 import { NoticeBar } from '../shared/NoticeBar';
 import styles from './CalculatorScreen.module.css';
+import { CommandBar } from './CommandBar';
 import { Dock } from './Dock';
 import { InputsPanel } from './InputsPanel';
+import { LadderPane } from './LadderPane';
 import { ResultPanel } from './ResultPanel';
 
 export interface CalculatorScreenProps {
@@ -66,7 +68,8 @@ export function CalculatorScreen({
   useEffect(() => () => writer.flush(), [writer]);
 
   // Profile changes made elsewhere (import, reset, another tab) flow into the form. Startup
-  // already filled it, so only later changes are applied.
+  // already filled it, and saves made from this form are recorded as synced (saveProfile
+  // below), so a save never writes back over a field the trader is still typing in.
   const { equity, availableCash } = app.doc.profile;
   const syncedProfile = useRef({ equity, availableCash });
   useEffect(() => {
@@ -75,6 +78,12 @@ export function CalculatorScreen({
     syncedProfile.current = { equity, availableCash };
     dispatch({ type: 'setProfile', equity: shown(equity), availableCash: shown(availableCash) });
   }, [equity, availableCash]);
+
+  const saveProfile = (equityText: string, cashText: string) => {
+    store.actions.saveProfile(equityText, cashText);
+    const saved = store.getState().doc.profile;
+    syncedProfile.current = { equity: saved.equity, availableCash: saved.availableCash };
+  };
 
   // A reset clears the trade and the link too.
   useEffect(() => {
@@ -99,7 +108,7 @@ export function CalculatorScreen({
   return (
     <div className={styles.screen}>
       <div className={styles.layout}>
-        <div className={styles.inputs}>
+        <div className={styles.setup}>
           {app.notice && (
             <NoticeBar
               text={NOTICE_TEXT[app.notice]}
@@ -114,14 +123,41 @@ export function CalculatorScreen({
               onDismiss={() => setLinkNotice(null)}
             />
           )}
-          <ProfileStrip {...context} />
+          <CommandBar
+            state={state}
+            dispatch={dispatch}
+            onApplied={(next, actions) => {
+              // Equity and cash typed on the line are remembered, like typing them in the fields.
+              const touchesProfile = actions.some(
+                (a) =>
+                  a.type === 'setField' && (a.field === 'equity' || a.field === 'availableCash'),
+              );
+              if (touchesProfile) {
+                saveProfile(next.form.equity, next.form.availableCash);
+              }
+            }}
+          />
           <PresetChips
             presets={app.doc.presets}
             form={state.form}
             onApply={applyPreset}
             onNew={() => setEditor({ open: true, mode: 'new', draft: draftFromForm(state.form) })}
           />
-          <InputsPanel {...context} preview={preview} />
+        </div>
+        <div className={styles.ladder}>
+          <LadderPane
+            state={state}
+            preview={preview}
+            result={outcome.ok ? outcome.result : null}
+            dispatch={dispatch}
+          />
+        </div>
+        <div className={styles.fields}>
+          <InputsPanel
+            {...context}
+            preview={preview}
+            account={<ProfileStrip {...context} onSave={saveProfile} />}
+          />
         </div>
         <div className={styles.result}>
           <ResultPanel outcome={outcome} symbol={state.symbol} shareLink={shareLink} />

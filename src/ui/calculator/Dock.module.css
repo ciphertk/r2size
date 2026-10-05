@@ -1,3 +1,4 @@
+/* Phone and narrow screens: the quantity and Copy stay in thumb reach while typing. */
 .dock {
   position: fixed;
   right: 0;
@@ -8,23 +9,26 @@
   grid-template-columns: 1fr auto;
   align-items: center;
   column-gap: var(--s-3);
-  padding: var(--s-3) var(--s-4) calc(var(--s-3) + env(safe-area-inset-bottom));
+  padding: 10px var(--s-4) calc(10px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--line);
-  background: var(--surface);
+  background: rgb(8 9 10 / 0.86);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
 }
 
 .qty {
   margin: 0;
-  font-size: 26px;
-  font-weight: 500;
+  font-size: 24px;
+  font-weight: 600;
   line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
 .side {
   margin-right: var(--s-1);
   vertical-align: middle;
-  font: 400 11px/1 var(--font-mono);
-  letter-spacing: 0.12em;
+  font: 500 11px/1 var(--font-mono);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--gain);
 }
@@ -42,7 +46,7 @@
   display: grid;
 }
 
-@media (min-width: 880px) {
+@media (min-width: 1100px) {
   .dock {
     display: none;
   }

@@ -1,40 +1,49 @@
 .button {
-  min-height: 48px;
+  min-height: 40px;
   min-width: 52px;
   padding: 0 var(--s-3);
-  border-radius: var(--r-2);
+  border-radius: var(--r-3);
+  font-size: 13px;
+  font-weight: 500;
   white-space: nowrap;
   transition:
-    background-color 0.12s,
-    border-color 0.12s;
+    background-color 120ms ease,
+    border-color 120ms ease,
+    transform 120ms var(--ease-out);
+}
+
+.button:active {
+  transform: scale(0.97);
 }
 
 .primary {
+  min-height: 46px;
   border: 0;
   background: var(--text);
   color: var(--bg);
   font-weight: 600;
 }
 
-.primary:hover {
-  background: #fffaf0;
-}
-
 .ghost {
-  border: 1px solid var(--field-border);
+  border: 1px solid var(--line);
   background: transparent;
   color: var(--text);
 }
 
-.ghost:hover {
-  background: var(--raised);
+@media (hover: hover) and (pointer: fine) {
+  .primary:hover {
+    background: #e6e8eb;
+  }
+  .ghost:hover {
+    background: var(--raised-2);
+  }
 }
 
 .button[data-state='copied'] {
   color: var(--gain);
 }
 
-/* Green on the paper-white fill would fail contrast; the label change carries the meaning. */
+/* Green on the light fill would fail contrast; the label change carries the meaning. */
 .primary[data-state='copied'] {
   color: var(--bg);
 }

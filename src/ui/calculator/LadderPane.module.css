@@ -1,0 +1,407 @@
+/* ---- Pane: a collapsible card on narrow screens, a full-height column on wide ones ---- */
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-4);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+@media (min-width: 1100px) {
+  .pane {
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    background: var(--bg);
+  }
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.toggleMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font: 400 12px/1 var(--font-mono);
+  color: var(--text-3);
+}
+
+.chevron {
+  width: 6px;
+  height: 6px;
+  margin-top: 3px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-135deg);
+  transition: transform 160ms var(--ease-out);
+}
+
+.pane:not([data-open]) .chevron {
+  margin-top: -3px;
+  transform: rotate(45deg);
+}
+
+.help {
+  display: none;
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.body {
+  display: none;
+  height: 340px;
+  padding: var(--s-2) 0 var(--s-3) var(--s-3);
+  border-top: 1px solid var(--hair);
+}
+
+.pane[data-open] .body {
+  display: block;
+}
+
+.note {
+  display: none;
+  margin: 0;
+  padding: 0 14px 10px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.pane[data-open] .note {
+  display: block;
+}
+
+@media (min-width: 1100px) {
+  .toggle {
+    display: none;
+  }
+  .help {
+    display: block;
+    padding: var(--s-4) var(--s-5) 0;
+  }
+  .body,
+  .pane:not([data-open]) .body {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    padding: var(--s-5) 0 var(--s-5) var(--s-5);
+    border-top: 0;
+  }
+  .note,
+  .pane:not([data-open]) .note {
+    display: block;
+    padding: 0 var(--s-5) var(--s-4);
+  }
+}
+
+.empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: var(--s-4);
+  color: var(--text-3);
+  text-align: center;
+}
+
+/* ---- Chart: everything is placed by price; the right 64px is the price axis ---- */
+
+.chart {
+  position: relative;
+  height: 100%;
+  container-type: inline-size;
+  cursor: crosshair;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.chart[data-dragging] {
+  cursor: ns-resize;
+}
+
+.grid {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 0;
+  border-top: 1px solid var(--hair);
+  pointer-events: none;
+}
+
+.grid span {
+  position: absolute;
+  top: -7px;
+  right: 10px;
+  font: 400 11px/1 var(--font-mono);
+  color: var(--text-3);
+}
+
+.zoneLoss,
+.zoneGain,
+.level,
+.handle,
+.ghost {
+  right: 64px;
+}
+
+.zoneLoss,
+.zoneGain {
+  position: absolute;
+  left: 0;
+  pointer-events: none;
+  transition:
+    top 120ms var(--ease-out),
+    height 120ms var(--ease-out);
+}
+
+.zoneLoss {
+  background: color-mix(in oklab, var(--loss) 13%, transparent);
+  box-shadow: inset 2px 0 0 color-mix(in oklab, var(--loss) 60%, transparent);
+}
+
+.zoneGain {
+  background: color-mix(in oklab, var(--gain) 11%, transparent);
+  box-shadow: inset 2px 0 0 color-mix(in oklab, var(--gain) 55%, transparent);
+}
+
+.zoneGain[data-ghost] {
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in oklab, var(--gain) 7%, transparent) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+.zoneLabel {
+  position: absolute;
+  right: 12px;
+  font: 500 12px/1 var(--font-mono);
+  white-space: nowrap;
+}
+
+/* A narrow chart has no room beside the tags; the tags and the order card carry these. */
+@container (max-width: 480px) {
+  .zoneLabel {
+    display: none;
+  }
+}
+
+/* Both labels hug the entry line, clear of the draggable stop and target lines. */
+.zoneLoss .zoneLabel {
+  top: 9px;
+  color: var(--loss);
+}
+
+.zoneGain .zoneLabel {
+  bottom: 9px;
+  color: var(--gain);
+}
+
+.level {
+  position: absolute;
+  left: 40%;
+  height: 0;
+  border-top: 1px dashed var(--line);
+  pointer-events: none;
+  transition: top 120ms var(--ease-out);
+}
+
+.level span {
+  position: absolute;
+  right: 12px;
+  bottom: 3px;
+  font: 400 11px/1 var(--font-mono);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.level i {
+  font-style: normal;
+  color: color-mix(in oklab, var(--gain) 75%, var(--text-3));
+}
+
+/* A draggable price line inside a 32px touch band. */
+.handle {
+  position: absolute;
+  left: 0;
+  height: 32px;
+  margin-top: -16px;
+  cursor: ns-resize;
+  touch-action: none;
+  outline: none; /* focus is shown on the tag */
+  transition: top 120ms var(--ease-out);
+}
+
+/* 1:1 tracking while dragging: no easing between frames. */
+.chart[data-dragging] .zoneLoss,
+.chart[data-dragging] .zoneGain,
+.chart[data-dragging] .handle,
+.chart[data-dragging] .level {
+  transition: none;
+}
+
+.line {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: var(--text);
+}
+
+.handle[data-kind='stop'] .line,
+.handle[data-kind='target'] .line {
+  height: 2px;
+  margin-top: -0.5px;
+}
+
+.handle[data-kind='stop'] .line {
+  background: var(--loss);
+}
+
+.handle[data-kind='target'] .line {
+  background: var(--gain);
+}
+
+.tag {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px 0 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--raised);
+  font-size: 12px;
+  color: var(--text-2);
+  white-space: nowrap;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  transition:
+    transform 140ms var(--ease-out),
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.tag b {
+  font: 600 13px/1 var(--font-mono);
+  color: var(--text);
+}
+
+.tagDetail {
+  font: 400 12px/1 var(--font-mono);
+  color: var(--text-3);
+}
+
+/* Six dots drawn with a gradient: reads as "draggable" without an icon. */
+.grip {
+  width: 6px;
+  height: 12px;
+  margin-right: 2px;
+  background: radial-gradient(circle, var(--text-3) 1px, transparent 1.3px) 0 0 / 3px 4px;
+}
+
+.handle[data-kind='stop'] .tag {
+  border-color: color-mix(in oklab, var(--loss) 55%, transparent);
+}
+
+.handle[data-kind='target'] .tag {
+  border-color: color-mix(in oklab, var(--gain) 55%, transparent);
+}
+
+.handle:focus-visible .tag {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 40%, transparent);
+}
+
+.handle[data-dragging] .tag {
+  border-color: var(--focus);
+  transform: translateY(-50%) scale(1.05);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .handle:hover .tag {
+    border-color: var(--text-3);
+  }
+}
+
+.addTarget {
+  position: absolute;
+  left: 0;
+  margin-top: -14px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px dashed var(--line);
+  border-radius: var(--r-2);
+  background: var(--bg);
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+/* Hover preview ("what if the stop were here?"). */
+.ghost {
+  position: absolute;
+  left: 0;
+  height: 0;
+  border-top: 1px dashed var(--text-3);
+  pointer-events: none;
+}
+
+.ghost[data-side='loss'] {
+  border-top-color: color-mix(in oklab, var(--loss) 70%, transparent);
+}
+
+.ghost[data-side='gain'] {
+  border-top-color: color-mix(in oklab, var(--gain) 70%, transparent);
+}
+
+.ghostTag {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: var(--r-2);
+  background: var(--raised-3);
+  font: 500 12px/1 var(--font-mono);
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  animation: ghostIn 120ms var(--ease-out);
+}
+
+@keyframes ghostIn {
+  from {
+    opacity: 0;
+  }
+}
+
+.ghostArrow,
+.ghostHint {
+  color: var(--text-3);
+}
+
+.ghostHint {
+  margin-left: 4px;
+  font: 400 11px/1 var(--font-ui);
+}

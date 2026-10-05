@@ -6,12 +6,13 @@
   gap: var(--s-3);
   padding: var(--s-2) var(--s-2) var(--s-2) var(--s-3);
   border: 1px solid var(--line);
-  border-radius: var(--r-2);
+  border-radius: var(--r-3);
   background: var(--surface);
 }
 
 .caution {
-  border-color: var(--caution);
+  border-color: color-mix(in oklab, var(--caution) 45%, transparent);
+  background: color-mix(in oklab, var(--caution) 6%, var(--surface));
 }
 
 .text {
@@ -35,7 +36,9 @@
   font-size: 20px;
 }
 
-.dismiss:hover {
-  color: var(--text);
-  background: var(--raised);
+@media (hover: hover) and (pointer: fine) {
+  .dismiss:hover {
+    color: var(--text);
+    background: var(--raised-2);
+  }
 }
