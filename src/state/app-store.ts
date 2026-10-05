@@ -184,6 +184,12 @@ export const createAppStore = (deps: AppStoreDeps = browserDeps) => {
       commit({ ...state.doc, settings: { ...state.doc.settings, defaultPresetId: id } });
     },
 
+    /** The one-time "Add to Home Screen" hint on iOS Safari (M4-D5). */
+    dismissInstallHint() {
+      if (state.doc.settings.installHintDismissed) return;
+      commit({ ...state.doc, settings: { ...state.doc.settings, installHintDismissed: true } });
+    },
+
     setStaleDays(days: number) {
       commit({ ...state.doc, settings: { ...state.doc.settings, staleDays: days } });
     },

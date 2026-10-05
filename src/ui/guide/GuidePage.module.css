@@ -1,0 +1,196 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--s-5) var(--s-4) 96px;
+  line-height: 1.6;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text-2);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .back:hover {
+    color: var(--text);
+  }
+}
+
+.title {
+  margin: var(--s-2) 0 0;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.lede {
+  margin: var(--s-3) 0 0;
+  color: var(--text-2);
+  font-size: 15px;
+}
+
+.toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--s-5);
+}
+
+.toc a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  color: var(--text-2);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .toc a:hover {
+    background: var(--raised);
+    color: var(--text);
+  }
+}
+
+.section {
+  margin-top: 48px;
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--hair);
+  scroll-margin-top: calc(var(--header) + var(--s-3));
+}
+
+.section h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.section h3 {
+  margin: var(--s-5) 0 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.section p {
+  margin: var(--s-3) 0 0;
+  color: var(--text-2);
+}
+
+.section b {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.section a {
+  color: var(--accent-text);
+  text-underline-offset: 3px;
+}
+
+.section code {
+  padding: 1px 4px;
+  border-radius: var(--r-1);
+  background: var(--raised-2);
+  font: 400 12px/1.4 var(--font-mono);
+  color: var(--text-2);
+}
+
+.note {
+  font-size: 13px;
+  color: var(--text-3) !important;
+}
+
+/* Tables scroll sideways on narrow phones instead of squeezing the formulas. */
+.tableWrap {
+  margin-top: var(--s-4);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th,
+.table td {
+  padding: 10px var(--s-3) 10px 0;
+  border-top: 1px solid var(--hair);
+  font-weight: 400;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: 1px solid var(--hair);
+}
+
+.table thead th {
+  border-top: 0;
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.table tbody th {
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.formula {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.value {
+  padding-right: 0 !important;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--text);
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.glossary {
+  margin: var(--s-3) 0 0;
+}
+
+.entry {
+  padding: var(--s-4) 0;
+  border-bottom: 1px solid var(--hair);
+  scroll-margin-top: calc(var(--header) + var(--s-3));
+}
+
+/* Arriving from an info tip highlights that term briefly. */
+.entry:target dt {
+  color: var(--accent-text);
+}
+
+.entry dt {
+  font-weight: 600;
+}
+
+.entry dd {
+  margin: 6px 0 0;
+  color: var(--text-2);
+}
+
+.list {
+  margin: var(--s-3) 0 0;
+  padding-left: 1.2em;
+  color: var(--text-2);
+}
+
+.list li + li {
+  margin-top: 6px;
+}

@@ -42,9 +42,21 @@ describe('migrate', () => {
         preset(),
         preset({ id: 'p2', stop: { kind: 'atr', multiple: '1.5' }, maxAllocationPct: null }),
       ],
-      settings: { staleDays: 14, defaultPresetId: 'p2', persistRequested: true },
+      settings: {
+        staleDays: 14,
+        defaultPresetId: 'p2',
+        persistRequested: true,
+        installHintDismissed: true,
+      },
     });
     expect(migrate(JSON.parse(JSON.stringify(full)))).toEqual({ ok: true, doc: full });
+  });
+
+  it('loads a v1 document saved before installHintDismissed existed (M4: optional, default false)', () => {
+    const { staleDays, defaultPresetId, persistRequested } = defaultDoc(NOW).settings;
+    const old = { ...defaultDoc(NOW), settings: { staleDays, defaultPresetId, persistRequested } };
+    const result = migrate(JSON.parse(JSON.stringify(old)));
+    expect(result.ok && result.doc.settings.installHintDismissed).toBe(false);
   });
 
   it.each<[string, unknown]>([
@@ -77,7 +89,14 @@ describe('migrate', () => {
     ['51 presets', doc({ presets: Array.from({ length: 51 }, (_, i) => preset({ id: `p${i}` })) })],
     [
       'staleDays 0',
-      doc({ settings: { staleDays: 0, defaultPresetId: null, persistRequested: false } }),
+      doc({
+        settings: {
+          staleDays: 0,
+          defaultPresetId: null,
+          persistRequested: false,
+          installHintDismissed: false,
+        },
+      }),
     ],
   ])('rejects %s as corrupt', (_label, raw) => {
     expect(migrate(raw)).toEqual({ ok: false, reason: 'corrupt' });
@@ -245,7 +264,12 @@ describe('backup', () => {
               availableCash: cash,
               lastUpdated: equity === null ? null : NOW.toISOString(),
             },
-            settings: { staleDays, defaultPresetId: null, persistRequested: false },
+            settings: {
+              staleDays,
+              defaultPresetId: null,
+              persistRequested: false,
+              installHintDismissed: false,
+            },
           });
           expect(parseBackup(toBackup(d, NOW))).toEqual({ ok: true, doc: d });
         },

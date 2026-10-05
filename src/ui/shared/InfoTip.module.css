@@ -56,3 +56,20 @@
   line-height: 1.5;
   color: var(--text-2);
 }
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  margin-top: var(--s-1);
+  color: var(--accent-text);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .more:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}

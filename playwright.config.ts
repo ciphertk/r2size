@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// BASE_URL=https://r2size.pages.dev runs the suite against production (no local server).
+const BASE_URL = process.env.BASE_URL;
+
 export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
@@ -7,7 +10,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
-    baseURL: 'http://localhost:4173',
+    baseURL: BASE_URL ?? 'http://localhost:4173',
     trace: 'retain-on-failure',
   },
   projects: [
@@ -26,10 +29,14 @@ export default defineConfig({
       },
     },
   ],
-  webServer: {
-    command: 'pnpm build && pnpm preview --port 4173 --strictPort',
-    url: 'http://localhost:4173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  ...(BASE_URL
+    ? {}
+    : {
+        webServer: {
+          command: 'pnpm build && pnpm preview --port 4173 --strictPort',
+          url: 'http://localhost:4173',
+          reuseExistingServer: !process.env.CI,
+          timeout: 120_000,
+        },
+      }),
 });

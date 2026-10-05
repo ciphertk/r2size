@@ -3,11 +3,28 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './ui/styles/tokens.css';
 import './ui/styles/base.css';
+import { isStandalone, watchInstall } from './infra/install';
+import { requestPersistence } from './infra/persist';
+import { canonicalizeLocation } from './infra/route';
+import { startServiceWorker } from './infra/sw';
+import { installTrustedTypesPolicy } from './infra/trusted-types';
 import { AppStoreContext, createAppStore } from './state/app-store';
 import { App } from './ui/app/App';
 
+// Unknown paths become "/" (keeping the setup hash) before anything reads the URL (M4-D1).
+canonicalizeLocation();
+
 const store = createAppStore();
 store.connect();
+
+// Offline support and the update notice (ADR-007). Dev has no service worker. The Trusted Types
+// policy must exist first: registering the worker is the app's only script sink.
+installTrustedTypesPolicy();
+if (import.meta.env.PROD) startServiceWorker();
+
+// Once installed, ask the browser not to evict this app's storage (architecture §4).
+watchInstall(() => void requestPersistence());
+if (isStandalone()) void requestPersistence();
 
 const root = document.getElementById('root');
 if (root) {

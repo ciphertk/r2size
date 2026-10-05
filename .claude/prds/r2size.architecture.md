@@ -35,7 +35,7 @@ The sizing-rule decisions (D1–D12) are in [section 11](#11-sizing-decisions-an
 | Tooling | pnpm, Node LTS, ESLint flat config with import-boundary rules, Prettier | | |
 
 **Budgets, enforced in CI:**
-- Initial JS ≤ 90 KB gzipped (React is about 60 KB).
+- Initial JS ≤ 90 KB gzipped: what `index.html` loads. Lazily loaded chunks (the Guide, the service-worker helper) are reported separately by `pnpm size` (M4: 80 KB initial).
 - CSS ≤ 15 KB.
 - Fonts ≤ 30 KB woff2 total, self-hosted (subset Geist + Geist Mono).
 - `build.assetsInlineLimit: 0`, so nothing is inlined as a `data:` URL and `img-src` stays `'self'`.
@@ -306,7 +306,7 @@ interface StoredDocV1 {
   - `registerType: 'prompt'` with `useRegisterSW`. A waiting worker shows a non-blocking banner: "New version available — Reload".
   - On tap: flush the URL update, send `SKIP_WAITING`, reload on `controllerchange` only if a user-initiated flag is set.
   - No automatic reload and no timed polling; the browser checks on each launch/navigation.
-- **Manifest:** `name`/`short_name` R2Size; `start_url`, `scope`, `id` = `/`; `display: standalone`; `theme_color` and `background_color` `#121110` (dark only); icons 192, 512, maskable 512; `categories: ["finance"]`; screenshots.
+- **Manifest:** `name`/`short_name` R2Size; `start_url`, `scope`, `id` = `/`; `display: standalone`; `theme_color` and `background_color` `#08090a` (dark only; design doc v2); icons 192, 512, maskable 512; `categories: ["finance"]`; screenshots.
 - **Install button:** capture `beforeinstallprompt` on Chromium; show "Install app".
 - **iOS caveats:**
   - No install prompt: show a one-time "Share → Add to Home Screen" hint in Safari when not standalone.
@@ -322,7 +322,7 @@ interface StoredDocV1 {
 **Document policy** (`public/_headers`, `/*`):
 
 ```
-Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; worker-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests; require-trusted-types-for 'script'; trusted-types 'none'
+Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; worker-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests; require-trusted-types-for 'script'; trusted-types default
 Referrer-Policy: no-referrer
 X-Content-Type-Options: nosniff
 Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
@@ -331,8 +331,9 @@ Cross-Origin-Resource-Policy: same-origin
 Strict-Transport-Security: max-age=31536000; includeSubDomains
 ```
 
-- **`/sw.js` gets its own policy:** `default-src 'none'; connect-src 'self'` — precache downloads follow the worker's own policy, not the page's.
-- **Trusted Types:** keep `trusted-types 'none'` only if the offline E2E shows zero violations; otherwise relax to a named policy.
+- **`/sw.js` gets its own policy:** `default-src 'none'; script-src 'self'; connect-src 'self'`, so the worker can precache. `_headers` removes the page policy first (`! Content-Security-Policy`), because Cloudflare merges every matching rule (verified with `wrangler pages dev`, M4).
+- **Trusted Types (M4 result):** `'none'` blocked `navigator.serviceWorker.register('/sw.js')`, so the worker never registered. Now one policy named `default` (`src/infra/trusted-types.ts`) lets exactly this origin's `/sw.js` through and defines no `createHTML`/`createScript`; the CSP allows only that name. The no-network E2E asserts zero violations.
+- **One source:** `config/security-policy.ts` generates both the production `<meta>` (no `frame-ancestors` or `upgrade-insecure-requests`: meta can't carry the first, and WebKit applies the second to `http://localhost`, breaking local tests) and `dist/_headers`.
 - **Cache headers:** `/assets/*` `immutable, max-age=31536000`; `/`, `/index.html`, `/sw.js`, `/manifest.webmanifest` `no-cache`.
 - **Defence in depth:** a Vite plugin injects the same policy as `<meta>` **in production builds only** (meta can't set `frame-ancestors`; `connect-src 'none'` would break dev HMR).
 - **No inline scripts:** `injectRegister: false` and import the register module. Dark only, so no pre-paint theme script is needed.
@@ -348,7 +349,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
 
 ## 8. UI architecture
 
-- **Routing:** `/` and `/guide` via a tiny `history` switch. Guide is lazily loaded and precached. Info tips link to `/guide#term-<id>`; the share hash exists only on `/`. Unknown paths fall back to the app (Cloudflare Pages online, service worker offline).
+- **Routing:** `/` and `/guide` via a tiny `history` switch. Guide is lazily loaded and precached. Info tips link to `/guide#term-<id>`; the share hash exists only on `/`. Unknown paths are rewritten to `/` (or `/guide` for `/guide/…`), keeping the setup hash (PRD "Unknown paths" decision); Cloudflare Pages and the service worker's navigation fallback both serve the app for every path, so this works online and offline.
 - **State:** the form reducer holds **raw strings**; `result = useMemo(() => computeSizing(form, profile))` recalculates on every keystroke. Profile, presets and settings live in one external store. No form library.
 - **Inputs:**
   - `type="text" inputmode="decimal"`, `autocomplete="off"`, `enterkeyhint="next"`, `spellcheck=false`.
@@ -460,7 +461,7 @@ All accepted 2026-10-05 (mirrored in the PRD).
 - **"No network requests after load" wording:** the browser's own update check happens when the app is opened; nothing happens during use. The PRD metric reflects this.
 - **iOS storage split:** Safari and the installed app have separate storage, and Safari may clear non-installed sites. Encourage installing before entering the profile; Export/Import is the only bridge. Expect support questions in M5.
 - **Updates only on launch:** an installed app left open for days won't see a fix until reopened. Acceptable under ADR-006; documented in the Guide.
-- **Trusted Types with React/Workbox** may surface a violation; the E2E check catches it; fallback is removing `trusted-types 'none'`.
+- **Trusted Types with React/Workbox** may surface a violation; the E2E check catches it; resolved in M4 with a single `default` policy (see §7).
 - **Cloudflare script injection** (Web Analytics, Rocket Loader) would hurt Lighthouse and the privacy story; `no-network.spec` runs against the live URL.
 - **Shared links reveal the sharer's trade** (entry, stop, ₹ risk amount if used). Disclosed in the share UI.
 - **Lighthouse has no PWA category**; "Installable" relies on the manual matrix.

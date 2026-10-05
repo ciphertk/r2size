@@ -1,9 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { backupFileName, parseBackup, toBackup } from '../../domain/backup';
 import { formatShortDate, formatTyped } from '../../domain/format';
 import { BACKUP_PROBLEM_TEXT } from '../../domain/messages';
 import type { Preset, StoredDoc } from '../../domain/schema';
 import { saveTextFile } from '../../infra/download';
+import {
+  canPromptInstall,
+  isIosSafari,
+  isStandalone,
+  promptInstall,
+  subscribeToInstall,
+} from '../../infra/install';
 import { isPersisted } from '../../infra/persist';
 import { useAppState, useAppStore } from '../../state/app-store';
 import { Confirm, Sheet } from '../shared/Sheet';
@@ -214,6 +221,8 @@ function SettingsBody({ onEditPreset }: Pick<SettingsSheetProps, 'onEditPreset'>
         )}
       </section>
 
+      <InstallSection />
+
       <section className={styles.section} aria-labelledby="settings-storage">
         <h3 id="settings-storage" className={styles.heading}>
           Storage
@@ -246,5 +255,49 @@ function SettingsBody({ onEditPreset }: Pick<SettingsSheetProps, 'onEditPreset'>
         />
       </section>
     </div>
+  );
+}
+
+/** M4-D5: install on Chromium with the real prompt; on iOS Safari, the Share-sheet steps. */
+function InstallSection() {
+  const canPrompt = useSyncExternalStore(subscribeToInstall, canPromptInstall, () => false);
+  const [declined, setDeclined] = useState(false);
+  const standalone = isStandalone();
+  const ios = isIosSafari();
+  if (!standalone && !canPrompt && !ios) return null;
+
+  return (
+    <section className={styles.section} aria-labelledby="settings-install">
+      <h3 id="settings-install" className={styles.heading}>
+        Install
+      </h3>
+      {standalone ? (
+        <p className={styles.muted}>Installed: R2Size is running as an app on this device.</p>
+      ) : canPrompt ? (
+        <>
+          <p className={styles.muted}>
+            Opens from your home screen or dock and works offline. Your saved data stays with this
+            browser.
+          </p>
+          <div className={styles.buttons}>
+            <button
+              type="button"
+              className={styles.button}
+              onClick={() => {
+                void promptInstall().then((outcome) => setDeclined(outcome === 'dismissed'));
+              }}
+            >
+              Install app
+            </button>
+          </div>
+          {declined && <p className={styles.muted}>Not installed. You can install it any time.</p>}
+        </>
+      ) : (
+        <p className={styles.muted}>
+          In Safari, tap Share, then Add to Home Screen. The installed app keeps its own storage, so
+          set up your equity and presets there (or use Export and Import).
+        </p>
+      )}
+    </section>
   );
 }

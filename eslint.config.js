@@ -39,11 +39,22 @@ const engineSyntax = [
 ];
 
 export default tseslint.config(
-  { ignores: ['node_modules/', 'coverage/', 'reports/', '.stryker-tmp/', 'dist/', 'design/'] },
+  {
+    ignores: [
+      'node_modules/',
+      'coverage/',
+      'reports/',
+      '.stryker-tmp/',
+      '.wrangler/',
+      '.lighthouseci/',
+      'dist/',
+      'design/',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strict,
   {
-    files: ['**/*.{js,mjs,ts,tsx}'],
+    files: ['**/*.{js,mjs,cjs,ts,tsx}'],
     languageOptions: { globals: { ...globals.node } },
   },
   {

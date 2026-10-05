@@ -7,7 +7,12 @@ const NOW = new Date('2026-10-05T10:00:00.000Z');
 const doc: StoredDoc = {
   ...defaultDoc(NOW),
   profile: { equity: '2000000', availableCash: '640000', lastUpdated: NOW.toISOString() },
-  settings: { staleDays: 7, defaultPresetId: 'conservative', persistRequested: true },
+  settings: {
+    staleDays: 7,
+    defaultPresetId: 'conservative',
+    persistRequested: true,
+    installHintDismissed: false,
+  },
 };
 
 describe('startupState (M3-D5)', () => {

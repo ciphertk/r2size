@@ -21,11 +21,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:mutation": "stryker run"
+    "test:mutation": "stryker run",
+    "lhci": "pnpm build && lhci autorun",
+    "icons": "node scripts/make-icons.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.63.0",
     "@preact/preset-vite": "^2.10.6",
     "@stryker-mutator/core": "^10.0.0",
@@ -47,7 +50,10 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.0",
     "vite": "^8.3.2",
-    "vitest": "^4.1.11"
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^4.1.11",
+    "workbox-build": "^7.4.1",
+    "wrangler": "^4.147.0"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -55,6 +61,7 @@
     "preact": "^11.0.0",
     "react": "npm:@preact/compat@^18.3.2",
     "react-dom": "npm:@preact/compat@^18.3.2",
-    "valibot": "^1.5.0"
+    "valibot": "^1.5.0",
+    "workbox-window": "^7.4.1"
   }
 }

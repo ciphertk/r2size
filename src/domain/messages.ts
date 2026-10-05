@@ -111,6 +111,16 @@ export const BACKUP_PROBLEM_TEXT = {
 } as const;
 
 /** Short explanations behind each "i" button. The full Guide arrives in Milestone 4. */
+/** App update and install wording (M4-D4, M4-D5). */
+export const APP_TEXT = {
+  updateReady: 'A new version of R2Size is ready.',
+  iosInstallHint:
+    'Install R2Size: tap Share, then Add to Home Screen. Set up your equity again in the installed app (it keeps its own storage), or use Export and Import.',
+} as const;
+
+/** The public source code, linked from the Guide (M4-D10). */
+export const SOURCE_URL = 'https://github.com/ciphertk/r2size';
+
 export const INFO_TEXT = {
   entry: 'The price you plan to buy at, usually your limit price.',
   stop: 'Where you will exit if the trade goes wrong. Type a price, a % below entry, or a multiple of ATR (average true range, which you look up on your chart). A derived stop is rounded down onto the tick.',

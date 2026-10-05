@@ -7,3 +7,5 @@ reports/
 design/
 docs/
 *.md
+.wrangler/
+.lighthouseci/

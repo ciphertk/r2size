@@ -28,7 +28,8 @@ jobs:
         run: pnpm size
 
   e2e:
-    # Phone viewports: Pixel 7 (Chromium) and iPhone 14 (WebKit), including axe checks.
+    # Pixel 7 (Chromium), iPhone 14 (WebKit) and a 1440 px desktop (three-pane layout), with axe,
+    # plus the offline, update-flow and no-network specs (service-worker specs run on Chromium).
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -48,6 +49,26 @@ jobs:
           path: |
             test-results/
             playwright-report/
+
+  lighthouse:
+    # Performance, accessibility and best practices >= 0.9, on the build served by
+    # `wrangler pages dev` so the real Cloudflare _headers apply (M4-D9).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lhci
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse
+          path: reports/lighthouse/
 
   mutation:
     # The sizing engine's mutation gate (PRD Milestone 1): runs when the engine changes.

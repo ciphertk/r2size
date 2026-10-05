@@ -56,6 +56,18 @@ const SHORT_DATE = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'sh
 export const formatShortDate = (isoTimestamp: string): string =>
   SHORT_DATE.format(new Date(isoTimestamp));
 
+const LONG_DATE = new Intl.DateTimeFormat('en-IN', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});
+
+/** A calendar date "2025-04-15" → "15 Apr 2025", read as a local date (no time-zone shift). */
+export const formatCalendarDate = (isoDate: string): string => {
+  const [year = 0, month = 1, day = 1] = isoDate.split('-').map(Number);
+  return LONG_DATE.format(new Date(year, month - 1, day));
+};
+
 /** "today", "yesterday", "12 days ago" */
 export const formatDaysAgo = (days: number): string =>
   days <= 0 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`;

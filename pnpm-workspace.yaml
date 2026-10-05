@@ -1,0 +1,4 @@
+allowBuilds:
+  # wrangler (local Cloudflare Pages server for Lighthouse, and deploys) needs these binaries.
+  esbuild: true
+  workerd: true

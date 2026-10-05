@@ -90,6 +90,8 @@ export const SettingsSchema = v.object({
   staleDays: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(90)),
   defaultPresetId: v.nullable(v.string()),
   persistRequested: v.boolean(),
+  /** Added in M4 as optional (default false), so v1 documents and backups need no migration. */
+  installHintDismissed: v.optional(v.boolean(), false),
 });
 
 export const StoredDocSchema = v.object({

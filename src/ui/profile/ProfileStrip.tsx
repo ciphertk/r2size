@@ -1,5 +1,4 @@
 import { formatDaysAgo, formatTyped } from '../../domain/format';
-import { INFO_TEXT } from '../../domain/messages';
 import { daysSince, isStale } from '../../domain/staleness';
 import { useAppState, useAppStore } from '../../state/app-store';
 import { fieldProps, type FieldContext } from '../calculator/field-props';
@@ -64,7 +63,7 @@ export function ProfileStrip({ onSave, ...context }: ProfileStripProps) {
           save();
         }}
         prefix="₹"
-        aside={<InfoTip topic="Equity" text={INFO_TEXT.equity} />}
+        aside={<InfoTip topic="Equity" term="equity" />}
       />
       <NumberField
         {...cashProps}
@@ -75,7 +74,7 @@ export function ProfileStrip({ onSave, ...context }: ProfileStripProps) {
         label="Available cash (optional)"
         prefix="₹"
         short="Cash"
-        aside={<InfoTip topic="Available cash" text={INFO_TEXT.availableCash} />}
+        aside={<InfoTip topic="Available cash" term="availableCash" />}
       />
       <p className={stale ? styles.noteStale : styles.note}>
         {storage === 'unavailable'

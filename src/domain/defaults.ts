@@ -33,5 +33,10 @@ export const defaultDoc = (now: Date): StoredDoc => ({
   schemaVersion: CURRENT_SCHEMA_VERSION,
   profile: { equity: null, availableCash: null, lastUpdated: null },
   presets: seedPresets(now),
-  settings: { staleDays: DEFAULT_STALE_DAYS, defaultPresetId: null, persistRequested: false },
+  settings: {
+    staleDays: DEFAULT_STALE_DAYS,
+    defaultPresetId: null,
+    persistRequested: false,
+    installHintDismissed: false,
+  },
 });
