@@ -140,7 +140,11 @@ test('exports a backup, resets, and imports it back', async ({ page }, testInfo)
   const confirm = page.getByRole('alertdialog', { name: 'Delete all data?' });
   await expect(confirm.getByRole('button', { name: 'Cancel' })).toBeVisible();
   await confirm.getByRole('button', { name: 'Delete everything' }).click();
+  // Let the confirm finish closing first: an Escape that lands while it is still closing goes to
+  // it, not to Settings (CI run 37341135555), and Settings would stay open.
+  await expect(confirm).toBeHidden();
   await page.keyboard.press('Escape');
+  await expect(settings).toBeHidden();
   await expect(equity(page)).toHaveValue('');
   await expect(page.getByText('All data on this device was deleted.')).toBeVisible();
 
@@ -150,6 +154,7 @@ test('exports a backup, resets, and imports it back', async ({ page }, testInfo)
   await expect(preview).toContainText('equity ₹15,00,000');
   await preview.getByRole('button', { name: 'Replace my data' }).click();
   await page.keyboard.press('Escape');
+  await expect(settings).toBeHidden();
   await expect(equity(page)).toHaveValue('15,00,000');
 
   const after = await page.evaluate(() => JSON.parse(localStorage.getItem('r2size') ?? 'null'));
