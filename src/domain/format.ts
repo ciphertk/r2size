@@ -50,6 +50,16 @@ export const formatSignedMoney = (value: Rational): string => {
 /** R-multiples: "3.00", "2.63", "−1.00". */
 export const formatR = (value: Rational): string => fixed(value, 2);
 
+const SHORT_DATE = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' });
+
+/** "2026-10-03T…" → "3 Oct" in the device's local time. */
+export const formatShortDate = (isoTimestamp: string): string =>
+  SHORT_DATE.format(new Date(isoTimestamp));
+
+/** "today", "yesterday", "12 days ago" */
+export const formatDaysAgo = (days: number): string =>
+  days <= 0 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`;
+
 /**
  * Groups what the user typed without changing its value: "2000000" → "20,00,000",
  * "100.5" → "100.5". Anything that isn't a plain decimal is returned untouched.

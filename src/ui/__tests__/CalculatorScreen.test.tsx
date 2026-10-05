@@ -1,9 +1,15 @@
-import { render, screen, within } from '@testing-library/preact';
+import { screen, within } from '@testing-library/preact';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { WORKED_EXAMPLES } from '../../engine/__fixtures__/worked-examples';
 import { INITIAL_STATE, type CalcState } from '../../state/form-reducer';
 import { CalculatorScreen } from '../calculator/CalculatorScreen';
+import { renderWithStore as render } from './render';
+
+beforeEach(() => {
+  localStorage.clear();
+  window.history.replaceState(null, '', '/');
+});
 
 const fixture = (name: string): CalcState => {
   const example = WORKED_EXAMPLES.find((e) => e.name.startsWith(name));

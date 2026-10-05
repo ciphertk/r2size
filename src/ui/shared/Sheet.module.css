@@ -1,0 +1,127 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgb(0 0 0 / 0.6);
+  transition: opacity 0.15s;
+}
+
+.backdrop[data-starting-style],
+.backdrop[data-ending-style] {
+  opacity: 0;
+}
+
+.viewport {
+  position: fixed;
+  inset: 0;
+  z-index: 31;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.popup {
+  width: 100%;
+  max-height: 88dvh;
+  overflow-y: auto;
+  padding: var(--s-4) var(--s-4) calc(var(--s-5) + env(safe-area-inset-bottom));
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: var(--r-2) var(--r-2) 0 0;
+  background: var(--surface);
+  color: var(--text);
+  transition:
+    transform 0.18s,
+    opacity 0.18s;
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+  transform: translateY(24px);
+  opacity: 0;
+}
+
+@media (min-width: 640px) {
+  .viewport {
+    align-items: center;
+    padding: var(--s-5);
+  }
+
+  .popup {
+    max-width: 520px;
+    border-bottom: 1px solid var(--line);
+    border-radius: var(--r-2);
+    padding-bottom: var(--s-5);
+  }
+}
+
+.alert {
+  max-width: 420px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.close {
+  width: 44px;
+  height: 44px;
+  margin-right: calc(-1 * var(--s-2));
+  border: 0;
+  border-radius: var(--r-2);
+  background: none;
+  color: var(--text-2);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.close:hover {
+  color: var(--text);
+  background: var(--raised);
+}
+
+.description {
+  margin: var(--s-2) 0 var(--s-4);
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-2);
+  margin-top: var(--s-4);
+}
+
+.secondary,
+.danger {
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  border-radius: var(--r-2);
+}
+
+.secondary {
+  border: 1px solid var(--field-border);
+  background: transparent;
+  color: var(--text);
+}
+
+.danger {
+  border: 1px solid var(--loss);
+  background: transparent;
+  color: var(--loss);
+  font-weight: 600;
+}
+
+.danger:hover {
+  background: color-mix(in oklab, var(--loss) 14%, transparent);
+}

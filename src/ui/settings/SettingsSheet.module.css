@@ -1,0 +1,142 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  margin-top: var(--s-3);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+}
+
+.section:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.heading {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-2);
+}
+
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: 15px;
+}
+
+.days {
+  width: 64px;
+  min-height: 44px;
+  padding: 0 var(--s-2);
+  border: 1px solid var(--field-border);
+  border-radius: var(--r-2);
+  background: var(--field);
+  text-align: center;
+  font-size: 16px;
+}
+
+.days:focus {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 1px var(--focus);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  min-height: 48px;
+  border-bottom: 1px solid var(--line);
+}
+
+.item:last-child {
+  border-bottom: 0;
+}
+
+.muted {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--loss);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.button,
+.small,
+.primary,
+.danger {
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  border-radius: var(--r-2);
+}
+
+.button,
+.small {
+  border: 1px solid var(--field-border);
+  background: transparent;
+  color: var(--text);
+}
+
+.small {
+  padding: 0 var(--s-3);
+}
+
+.button:hover,
+.small:hover {
+  background: var(--raised);
+}
+
+.primary {
+  border: 0;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.danger {
+  align-self: flex-start;
+  border: 1px solid var(--loss);
+  background: transparent;
+  color: var(--loss);
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  border: 1px solid var(--caution);
+  border-radius: var(--r-2);
+}
+
+.preview p {
+  margin: 0;
+  font-size: 14px;
+}

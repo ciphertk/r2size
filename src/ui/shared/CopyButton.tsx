@@ -3,8 +3,8 @@ import { copyText } from '../../infra/clipboard';
 import styles from './CopyButton.module.css';
 
 export interface CopyButtonProps {
-  /** What gets copied. */
-  readonly text: string;
+  /** What gets copied, or a function that works it out at the moment of the tap. */
+  readonly text: string | (() => string);
   /** Spoken confirmation, e.g. "Quantity" → "Quantity copied". */
   readonly what: string;
   readonly variant?: 'primary' | 'ghost';
@@ -21,7 +21,7 @@ export function CopyButton({ text, what, variant = 'ghost', children }: CopyButt
   useEffect(() => () => clearTimeout(timer.current), []);
 
   const onClick = async () => {
-    const ok = await copyText(text);
+    const ok = await copyText(typeof text === 'function' ? text() : text);
     setState(ok ? 'copied' : 'failed');
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setState('idle'), FEEDBACK_MS);

@@ -1,0 +1,41 @@
+.info,
+.caution {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-2) var(--s-2) var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--surface);
+}
+
+.caution {
+  border-color: var(--caution);
+}
+
+.text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.caution .text {
+  color: var(--caution);
+}
+
+.dismiss {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: var(--r-1);
+  background: none;
+  color: var(--text-2);
+  font-size: 20px;
+}
+
+.dismiss:hover {
+  color: var(--text);
+  background: var(--raised);
+}

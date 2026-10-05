@@ -150,3 +150,16 @@
   font-size: 12px;
   color: var(--text-3);
 }
+
+.share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+}
+
+.shareNote {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-3);
+}

@@ -12,8 +12,49 @@
   gap: var(--s-3);
 }
 
-.note {
+.note,
+.noteStale {
   margin: 0;
   font-size: 12px;
   color: var(--text-3);
+}
+
+.noteStale {
+  color: var(--caution);
+}
+
+.reminder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2) var(--s-3);
+  margin-bottom: var(--s-2);
+  padding: var(--s-3);
+  border: 1px solid var(--caution);
+  border-radius: var(--r-2);
+}
+
+.reminderText {
+  margin: 0;
+  font-size: 14px;
+  color: var(--caution);
+}
+
+.reminderActions {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.button {
+  min-height: 40px;
+  padding: 0 var(--s-3);
+  border: 1px solid var(--field-border);
+  border-radius: var(--r-2);
+  background: transparent;
+  color: var(--text);
+}
+
+.button:hover {
+  background: var(--raised);
 }

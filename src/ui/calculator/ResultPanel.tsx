@@ -29,9 +29,11 @@ export const firstTarget = (result: SizingResult) =>
 export interface ResultPanelProps {
   readonly outcome: SizingOutcome;
   readonly symbol: string;
+  /** Builds the link for this setup at the moment Share is tapped (never includes the profile). */
+  readonly shareLink: () => string;
 }
 
-export function ResultPanel({ outcome, symbol }: ResultPanelProps) {
+export function ResultPanel({ outcome, symbol, shareLink }: ResultPanelProps) {
   return (
     <aside className={styles.panel} aria-label="Result">
       {outcome.ok ? (
@@ -45,6 +47,14 @@ export function ResultPanel({ outcome, symbol }: ResultPanelProps) {
           <p className={styles.note}>
             P&amp;L is after costs. A gap down can open below your stop and lose more than this.
           </p>
+          <div className={styles.share}>
+            <CopyButton what="Setup link" text={shareLink}>
+              Copy setup link
+            </CopyButton>
+            <p className={styles.shareNote}>
+              Shares trade inputs only — never your equity or cash.
+            </p>
+          </div>
         </>
       )}
     </aside>

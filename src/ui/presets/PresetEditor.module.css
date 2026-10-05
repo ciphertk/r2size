@@ -1,0 +1,72 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.label {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.text {
+  min-height: 48px;
+  padding: 0 var(--s-3);
+  border: 1px solid var(--field-border);
+  border-radius: var(--r-2);
+  background: var(--field);
+  font-size: 16px;
+}
+
+.text:focus {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 1px var(--focus);
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--loss);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+  align-items: end;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+
+.save,
+.delete {
+  min-height: 48px;
+  padding: 0 var(--s-4);
+  border-radius: var(--r-2);
+}
+
+.save {
+  border: 0;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.delete {
+  margin-right: auto;
+  border: 1px solid var(--loss);
+  background: transparent;
+  color: var(--loss);
+}

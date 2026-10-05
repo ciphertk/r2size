@@ -4,6 +4,9 @@
  * derived from this, never stored.
  */
 import type { FieldId, RawForm, RiskMode, StopMode } from '../engine';
+import { applyPreset } from '../domain/presets';
+import type { PresetFields } from '../domain/schema';
+import type { ShareableSetup } from '../domain/share-url';
 
 export type TextField = Exclude<keyof RawForm, 'stopMode' | 'riskMode' | 'targets'>;
 export type TargetSlot = 0 | 1 | 2;
@@ -21,7 +24,48 @@ export type CalcAction =
   | { readonly type: 'setSymbol'; readonly value: string }
   | { readonly type: 'setStopMode'; readonly mode: StopMode }
   | { readonly type: 'setRiskMode'; readonly mode: RiskMode }
-  | { readonly type: 'touch'; readonly field: FieldId };
+  | { readonly type: 'touch'; readonly field: FieldId }
+  | { readonly type: 'applyPreset'; readonly preset: PresetFields }
+  | { readonly type: 'loadSetup'; readonly setup: ShareableSetup }
+  | { readonly type: 'setProfile'; readonly equity: string; readonly availableCash: string }
+  /** Clears the trade, keeping the profile figures. */
+  | { readonly type: 'clearTrade' };
+
+/** A shared setup replaces the trade inputs; the trader's own equity and cash stay. */
+export const withSetup = (form: RawForm, setup: ShareableSetup): RawForm => ({
+  ...form,
+  entry: setup.entry,
+  stopMode: setup.stopMode,
+  stopPrice: setup.stopPrice,
+  stopPct: setup.stopPct,
+  atr: setup.atr,
+  atrMultiple: setup.atrMultiple,
+  tick: setup.tick,
+  riskMode: setup.riskMode,
+  riskPct: setup.riskPct,
+  riskAmount: setup.riskAmount,
+  maxAllocationPct: setup.maxAllocationPct,
+  costPct: setup.costPct,
+  targets: setup.targets,
+});
+
+/** The trade inputs worth putting in a link: never equity or cash (ADR-005). */
+export const setupOf = ({ form, symbol }: CalcState): ShareableSetup => ({
+  symbol,
+  entry: form.entry,
+  stopMode: form.stopMode,
+  stopPrice: form.stopPrice,
+  stopPct: form.stopPct,
+  atr: form.atr,
+  atrMultiple: form.atrMultiple,
+  tick: form.tick,
+  riskMode: form.riskMode,
+  riskPct: form.riskPct,
+  riskAmount: form.riskAmount,
+  maxAllocationPct: form.maxAllocationPct,
+  costPct: form.costPct,
+  targets: form.targets,
+});
 
 export const INITIAL_STATE: CalcState = {
   form: {
@@ -65,5 +109,27 @@ export const calcReducer = (state: CalcState, action: CalcAction): CalcState => 
       return state.touched.has(action.field)
         ? state
         : { ...state, touched: new Set([...state.touched, action.field]) };
+    case 'applyPreset':
+      return { ...state, form: applyPreset(state.form, action.preset) };
+    case 'loadSetup':
+      return {
+        form: withSetup(state.form, action.setup),
+        symbol: action.setup.symbol,
+        touched: new Set(),
+      };
+    case 'setProfile':
+      return {
+        ...state,
+        form: { ...state.form, equity: action.equity, availableCash: action.availableCash },
+      };
+    case 'clearTrade':
+      return {
+        ...INITIAL_STATE,
+        form: {
+          ...INITIAL_STATE.form,
+          equity: state.form.equity,
+          availableCash: state.form.availableCash,
+        },
+      };
   }
 };

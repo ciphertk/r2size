@@ -26,6 +26,7 @@ export { NSE_TICK_TABLE } from './tick-bands';
 export { decimal, parseDecimal, toDecimalString } from './decimal';
 export type { Rounding } from './decimal';
 export { PLACES } from './validate';
+export { cmp, isPositive } from './rational';
 
 /** Risk above this % of equity is allowed but warned about. */
 const HIGH_RISK_PCT = q(5n);

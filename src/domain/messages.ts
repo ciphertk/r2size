@@ -81,6 +81,35 @@ const WARNING_TEXT = {
 
 export const warningText = (code: WarningCode): string => WARNING_TEXT[code];
 
+/** Banner text for things that happened to the saved data (state/app-store.ts AppNotice). */
+export const NOTICE_TEXT = {
+  storageUnavailable:
+    "Can't save on this device (private browsing or storage blocked). Your data won't be kept.",
+  storageFull: 'Storage is full, so the last change was not saved.',
+  recoveredCorrupt:
+    'Your saved data could not be read, so R2Size started fresh. A copy of the old data was kept.',
+  newerData:
+    'Your saved data is from a newer version of R2Size. Reload the app to update; nothing here will be saved until then.',
+  imported: 'Backup imported.',
+  importUndone: 'Import undone. Your previous data is back.',
+  reset: 'All data on this device was deleted.',
+} as const;
+
+export const LINK_NOTICE_TEXT = {
+  newerLink: 'This link is from a newer version of R2Size, so it was not opened.',
+  invalidLink: 'This link could not be read.',
+  ignoredValues: (fields: readonly string[]) =>
+    `Some values in this link were not valid and were left blank: ${fields.join(', ')}.`,
+} as const;
+
+export const BACKUP_PROBLEM_TEXT = {
+  tooLarge: 'That file is too large to be an R2Size backup.',
+  notJson: 'That file is not an R2Size backup (it is not JSON).',
+  notR2size: 'That file is not an R2Size backup.',
+  newer: 'That backup is from a newer version of R2Size. Update the app first.',
+  invalid: 'That backup is damaged or incomplete, so nothing was changed.',
+} as const;
+
 /** Short explanations behind each "i" button. The full Guide arrives in Milestone 4. */
 export const INFO_TEXT = {
   entry: 'The price you plan to buy at, usually your limit price.',
