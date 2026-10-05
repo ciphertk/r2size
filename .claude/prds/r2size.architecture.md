@@ -18,7 +18,7 @@ The sizing-rule decisions (D1–D12) are in [section 11](#11-sizing-decisions-an
 
 | Concern | Choice | Why | Rejected |
 |---|---|---|---|
-| Language | TypeScript, strict, with `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes` | The engine's types are its contract | JS + JSDoc (weaker guarantees for the engine) |
+| Language | TypeScript 6.0, strict, with `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes` | The engine's types are its contract. Not 7.x yet: typescript-eslint and Stryker's checker need the classic compiler | JS + JSDoc (weaker guarantees for the engine) |
 | UI | **React 19** (decided in the brief), with no state, form or router libraries | One screen plus a Guide page. `useReducer`, `useSyncExternalStore` and a ~30-line path switch cover it | Preact (fallback: alias `react` to `preact/compat` if the JS budget is exceeded; only `src/ui` touches React). Svelte/Solid (reopens a decided question). Vanilla/Lit (more hand-written DOM code). Next.js/Astro (server/static rendering adds nothing) |
 | Build | **Vite** (current major) | Fast, first-class PWA plugin, emits no inline scripts | webpack, Parcel |
 | Styling | Plain CSS with custom properties and CSS Modules, **dark theme only** (`color-scheme: dark`), tokens from [r2size.design.md](r2size.design.md), `font-variant-numeric: tabular-nums slashed-zero` | No runtime cost, works under `style-src 'self'` | Tailwind (one more toolchain), CSS-in-JS (needs a runtime and fights the security policy) |
@@ -27,7 +27,7 @@ The sizing-rule decisions (D1–D12) are in [section 11](#11-sizing-decisions-an
 | Icons | **Phosphor Icons** (`@phosphor-icons/react`, MIT), per-icon imports, about 6 icons | Consistent stroke, tree-shakable | Lucide (the default shadcn look) |
 | Validation of untrusted data | **Valibot** | A few KB after tree-shaking. Used for stored data, backups and URL params | Zod (larger), hand-written checks |
 | PWA | **vite-plugin-pwa**, `generateSW` mode, `registerType: 'prompt'`, registered from a module (no inline script) | Full Workbox precache and a "reload when the user asks" update flow | Hand-written service worker, `autoUpdate` (breaks "never reload mid-calculation") |
-| Unit and component tests | **Vitest** (`node` env for the engine, `happy-dom` for UI), **fast-check**, **Testing Library** | One runner for everything | Jest |
+| Unit and component tests | **Vitest 4.1** (`node` env for the engine, `happy-dom` for UI), **fast-check**, **Testing Library** | One runner for everything. Pinned to 4.1: Stryker's Vitest runner silently fails to activate mutants under Vitest 5 (see the M1 plan's implementation notes) | Jest |
 | Mutation tests (M1 gate) | **StrykerJS** on `src/engine` only | Proves the tests catch wrong arithmetic | — |
 | End-to-end tests | **Playwright** + `@axe-core/playwright` | Simulates offline, records every request, catches CSP violations | Cypress |
 | Lighthouse | **@lhci/cli** against `wrangler pages dev` (applies `_headers`) and the production URL | | |
@@ -203,19 +203,29 @@ type SizingOutcome = { ok: true; result: SizingResult; fieldErrors: FieldError[]
 ```ts
 export const NSE_TICK_TABLE = {
   effectiveFrom: '2025-04-15',
-  source: 'NSE circular: tick size revision, cash segment (via Zerodha/Fyers notices)',
+  source: 'NSE circular NSE/CMTR/67133 (Circular Ref. 33/2025), 13 Mar 2025',
+  sourceUrl: 'https://nsearchives.nseindia.com/content/circulars/CMTR67133.pdf',
   verifiedOn: '2026-10-05',
-  bands: [ // [min, max): min inclusive, max exclusive. BOUNDARY INCLUSIVITY TO BE VERIFIED (D5)
-    { min: '0',     max: '250',   tick: '0.01' }, { min: '250',   max: '1000',  tick: '0.05' },
-    { min: '1000',  max: '5000',  tick: '0.10' }, { min: '5000',  max: '10000', tick: '0.50' },
-    { min: '10000', max: '20000', tick: '1.00' }, { min: '20000', max: null,    tick: '5.00' },
+  // Ordered by upper bound. A price belongs to the first band whose upper bound admits it.
+  // Boundaries exactly as in the circular: "Below 250", "≥ 250 – 1,000", "> 1,000 – 5,000",
+  // "> 5,000 – 10,000", "> 10,000 – 20,000", "> 20,000". Only 250 starts a band inclusively;
+  // 1,000 / 5,000 / 10,000 / 20,000 belong to the LOWER band.
+  bands: [
+    { upTo: '250',   upToInclusive: false, tick: '0.01' },  // price < 250
+    { upTo: '1000',  upToInclusive: true,  tick: '0.05' },  // 250 ≤ price ≤ 1,000
+    { upTo: '5000',  upToInclusive: true,  tick: '0.10' },  // 1,000 < price ≤ 5,000
+    { upTo: '10000', upToInclusive: true,  tick: '0.50' },  // 5,000 < price ≤ 10,000
+    { upTo: '20000', upToInclusive: true,  tick: '1.00' },  // 10,000 < price ≤ 20,000
+    { upTo: null,    upToInclusive: false, tick: '5.00' },  // price > 20,000
   ],
 } as const;
 ```
 
 - Values are decimal strings, parsed by `decimal.ts`.
-- The Guide renders this table and its date.
-- A test checks that bands are contiguous and ticks increase.
+- The Guide renders this table with the circular's own boundary wording, its effective date and a link to the circular.
+- Tests check that upper bounds strictly increase, ticks strictly increase, only the last band is open-ended, and every boundary fixture (D5) resolves as in the circular.
+- **Scope, from the circular:** applies to securities in the EQ, T0, BE, BZ, BO, RL and AF series (and their BL series) and their stock futures. **ETFs are excluded**, so the Guide tells ETF traders to check and override the tick.
+- **How NSE assigns the tick:** reviewed monthly, from the closing price on the last trading day of the previous month, and applied from the first trading day of the month. The auto tick from today's entry price is therefore an estimate near band edges (D11). The authoritative per-security tick is in NSE's daily security file; the app has no market data, so it is never used.
 
 ## 4. State and persistence
 
@@ -371,7 +381,7 @@ Worked examples (fixtures, each with a hand derivation in a comment):
 - brief example: ₹20,00,000 equity, 1% risk, entry 100, stop 93 → 2,857 shares, investment ₹2,85,700, allocation 14.285%
 - PRD cost example: ₹100 / ₹95 at 0.25% → ₹0.25 cost per share
 - float traps: 200 with 5% stop → 190.00; 1.15-style values
-- every band edge: 249.99, 250, 250.05, 999.95, 1000, 1000.10, 5000, 10000, 20000
+- every band edge, per the NSE circular (D5): 249.99 → 0.01; 250.00 → 0.05; 1,000.00 → 0.05; 1,000.05 → 0.10; 5,000.00 → 0.10; 5,000.10 → 0.50; 10,000.00 → 0.50; 10,000.50 → 1.00; 20,000.00 → 1.00; 20,001.00 → 5.00
 - ATR stops landing exactly on and just off the tick grid
 - each binding constraint (risk, allocation, cash) and tie cases
 - each zero-quantity cause
@@ -437,7 +447,7 @@ All accepted 2026-10-05 (mirrored in the PRD).
 | D2 | R definition | R = entry − stop (price-based). P&L columns are net of cost per share, so the stop row = −actual risk and +1R nets slightly under 1R. The Guide explains this |
 | D3 | Cash cap and costs | cash ÷ (entry + cost per share). Allocation cap uses entry only |
 | D4 | Target rounding | +kR prices rounded **down** to the tick (toward entry). User-typed entry, stop and targets are not rounded; warn when off tick ("your broker may reject") |
-| D5 | NSE band boundary inclusivity | Implement as [min, max) (lower bound inclusive) **provisionally**; verify against the NSE circular before M1 closes, and add fixtures at every edge |
+| D5 | NSE band boundary inclusivity | **Verified 2026-10-05 against NSE/CMTR/67133:** price < 250 → 0.01; 250 ≤ price ≤ 1,000 → 0.05; then each band is (lower, upper]: 1,000 → 0.05, 5,000 → 0.10, 10,000 → 0.50, 20,000 → 1.00. Fixtures cover every edge |
 | D6 | "Round down" vs "away from entry" | Same thing for long-only: floor to the tick grid, documented as "away from entry" |
 | D7 | Equity when risk is in ₹ | Always required |
 | D8 | Target ≤ entry | Non-blocking error on that row; quantity still shown |

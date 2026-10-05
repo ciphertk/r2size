@@ -41,7 +41,7 @@ We'll know we're right when **the author and ≥5 other swing traders use it for
   - Risk and allocation shown are the actual values for the rounded-down quantity
   - Derived stops are rounded to a valid NSE price step, away from entry
   - Invalid inputs (stop ≥ entry, quantity < 1, missing values) give clear messages
-- **NSE price step (tick size):** auto-suggested from the entry price using NSE's price bands (effective 15 Apr 2025: <₹250 → ₹0.01; ₹250–1,000 → ₹0.05; ₹1,000–5,000 → ₹0.10; ₹5,000–10,000 → ₹0.50; ₹10,000–20,000 → ₹1.00; >₹20,000 → ₹5.00), always user-overridable. NSE assigns ticks monthly from the prior month's close, so the auto value is an estimate near band edges, and the UI must say so.
+- **NSE price step (tick size):** auto-suggested from the entry price using NSE's price bands (circular NSE/CMTR/67133, effective 15 Apr 2025: below ₹250 → ₹0.01; ≥ ₹250 to ₹1,000 → ₹0.05; > ₹1,000 to ₹5,000 → ₹0.10; > ₹5,000 to ₹10,000 → ₹0.50; > ₹10,000 to ₹20,000 → ₹1.00; > ₹20,000 → ₹5.00), always user-overridable. ETFs are excluded from these bands, so ETF traders must check the tick. NSE assigns ticks monthly from the prior month's close, so the auto value is an estimate near band edges, and the UI must say so.
 - **Results:**
   - Headline "Buy N shares"
   - Investment, allocation %, risk ₹ and %, risk per share
@@ -73,7 +73,7 @@ We'll know we're right when **the author and ≥5 other swing traders use it for
 
 | # | Milestone | Outcome | Status | Plan |
 |---|---|---|---|---|
-| 1 | Correct sizing engine | Every sizing rule (risk, rounding, NSE tick, caps, costs, R values) produces verified-correct results for the worked examples | pending | — |
+| 1 | Correct sizing engine | Every sizing rule (risk, rounding, NSE tick, caps, costs, R values) produces verified-correct results for the worked examples | complete | [.claude/plans/r2size-m1-sizing-engine.plan.md](../plans/r2size-m1-sizing-engine.plan.md) |
 | 2 | Usable calculator | A trader can enter a setup and copy the quantity, entry and stop in under 15 s on a phone | pending | — |
 | 3 | Remembers the trader | Account profile with a staleness reminder, presets, shareable URL setups, Export/Import | pending | — |
 | 4 | Installable & offline | App installs on Android, iOS and desktop and works in airplane mode; trust page live; publicly deployed | pending | — |
@@ -93,7 +93,7 @@ Accepted from the architecture review. Full rationale in [r2size.architecture.md
 - **D2 R definition:** R = entry − stop (price-based). R-table P&L is net of cost per share, so the stop row equals −actual risk (matching the headline) and +1R nets slightly under 1R. The Guide explains this.
 - **D3 Caps:** allocation cap = floor(equity × allocation% ÷ entry). Cash cap = floor(available cash ÷ (entry + cost per share)). Final quantity = min(risk, allocation, cash); ties go to "risk", and a tie between the two caps is reported as "cash".
 - **D4 Tick rounding of targets:** +1R/+2R/+3R prices are rounded down to the tick (toward entry). User-typed entry, stop and targets are never rounded; a warning shows when they are off the tick grid.
-- **D5 Band edges:** bands are implemented as [lower, upper) — a price exactly on a boundary uses the higher band — **provisionally**, until verified against the NSE circular (see Open Questions).
+- **D5 Band edges (verified against NSE/CMTR/67133):** a price below ₹250 uses ₹0.01, and exactly ₹250 starts the ₹0.05 band. Every other boundary belongs to the **lower** band: exactly ₹1,000 → ₹0.05, ₹5,000 → ₹0.10, ₹10,000 → ₹0.50, ₹20,000 → ₹1.00.
 - **D6 Derived stops:** floored to the tick grid, i.e. "away from entry" for long trades (same as "round down").
 - **D7 Equity:** always required, including when risk is entered in ₹.
 - **D8 Bad targets:** a target ≤ entry is a non-blocking error on its row; the quantity is still shown.
@@ -114,7 +114,7 @@ Accepted from the architecture review. Full rationale in [r2size.architecture.md
 ## Open Questions
 - [ ] Is the 15-second time-to-size target right? Validate after Milestone 2 by timing real sessions.
 - [ ] Default stale-profile reminder interval: 7 days is assumed. Validate with users in Milestone 5.
-- [ ] NSE tick-band boundaries: is a price exactly at ₹250, ₹1,000, ₹5,000, ₹10,000 or ₹20,000 in the lower or higher band? Verify against the NSE circular before Milestone 1 closes (D5).
+- [x] NSE tick-band boundaries — resolved 2026-10-05 from circular NSE/CMTR/67133 (see D5).
 
 ## Risks
 | Risk | Likelihood | Impact | Mitigation |
@@ -130,4 +130,4 @@ Accepted from the architecture review. Full rationale in [r2size.architecture.md
 
 ---
 *Status: DRAFT — requirements and architecture accepted ([r2size.architecture.md](r2size.architecture.md)). Implementation planning pending via /plan.*
-*Source: PRODUCT-BRIEF.md v3 (2026-10-05). Tick sizes: NSE revision effective 15 Apr 2025 ([Zerodha bulletin](https://zerodha.com/marketintel/bulletin/408151/revision-in-tick-size-for-nse-derivatives-and-cash-segment-from-april-15-2025), [Fyers notice](https://fyers.in/notice-board/tick-size-revision-for-nse-derivatives-cash-segment-effective-april-15-2025/)).*
+*Source: PRODUCT-BRIEF.md v3 (2026-10-05). Tick sizes: [NSE circular NSE/CMTR/67133](https://nsearchives.nseindia.com/content/circulars/CMTR67133.pdf) (13 Mar 2025), effective 15 Apr 2025; broker summaries ([Zerodha bulletin](https://zerodha.com/marketintel/bulletin/408151/revision-in-tick-size-for-nse-derivatives-and-cash-segment-from-april-15-2025), [Fyers notice](https://fyers.in/notice-board/tick-size-revision-for-nse-derivatives-cash-segment-effective-april-15-2025/)).*

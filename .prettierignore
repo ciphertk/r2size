@@ -1,0 +1,8 @@
+pnpm-lock.yaml
+coverage/
+reports/
+.stryker-tmp/
+.claude/
+design/
+docs/
+*.md
