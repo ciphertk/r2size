@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/preact';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { toBackup } from '../../domain/backup';
+import { MAX_BACKUP_BYTES, toBackup } from '../../domain/backup';
 import { defaultDoc } from '../../domain/defaults';
 import type { StoredDoc } from '../../domain/schema';
 import { KEY } from '../../infra/storage';
@@ -150,6 +150,20 @@ describe('settings & data (M3-D7)', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'That file is not an R2Size backup.',
     );
+  });
+
+  it('rejects an oversized file by its size, without reading it into memory', async () => {
+    const user = userEvent.setup();
+    renderWithStore(<CalculatorScreen settingsOpen />);
+    const huge = new File(['{}'], 'huge.json', { type: 'application/json' });
+    Object.defineProperty(huge, 'size', { value: MAX_BACKUP_BYTES + 1 });
+    const read = vi.fn(() => Promise.reject(new Error('the file was read')));
+    Object.defineProperty(huge, 'text', { value: read });
+    await user.upload(screen.getByLabelText('Backup file'), huge);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'That file is too large to be an R2Size backup.',
+    );
+    expect(read).not.toHaveBeenCalled();
   });
 
   it('resets everything after confirmation', async () => {

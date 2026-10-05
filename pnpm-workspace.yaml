@@ -2,3 +2,12 @@ allowBuilds:
   # wrangler (local Cloudflare Pages server for Lighthouse, and deploys) needs these binaries.
   esbuild: true
   workerd: true
+
+# Patched versions of transitive dev-tool dependencies flagged by `pnpm audit`. None ships to users
+# or receives attacker input here (security review, 2026-10-05); remove each once its parent tool
+# updates. extract-zip (via @lhci/cli → puppeteer's browser downloader) has no fixed release yet.
+overrides:
+  qs@<6.16.0: ^6.16.0
+  tmp@<0.2.6: ^0.2.7
+  uuid@<11.1.1: ^11.1.1
+  basic-ftp@<6.2.1: ^6.2.2

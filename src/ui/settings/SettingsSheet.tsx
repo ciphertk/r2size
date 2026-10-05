@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { backupFileName, parseBackup, toBackup } from '../../domain/backup';
+import { backupFileName, MAX_BACKUP_BYTES, parseBackup, toBackup } from '../../domain/backup';
 import { formatShortDate, formatTyped } from '../../domain/format';
 import { BACKUP_PROBLEM_TEXT } from '../../domain/messages';
 import type { Preset, StoredDoc } from '../../domain/schema';
@@ -80,6 +80,11 @@ function SettingsBody({ onEditPreset }: Pick<SettingsSheetProps, 'onEditPreset'>
   const readFile = async (file: File) => {
     setImportError(null);
     setPreview(null);
+    // Check the size the browser reports before reading: a huge file is never loaded into memory.
+    if (file.size > MAX_BACKUP_BYTES) {
+      setImportError(BACKUP_PROBLEM_TEXT.tooLarge);
+      return;
+    }
     const result = parseBackup(await file.text());
     if (result.ok) setPreview(result.doc);
     else setImportError(BACKUP_PROBLEM_TEXT[result.problem]);
