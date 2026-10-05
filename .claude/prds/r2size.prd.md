@@ -74,7 +74,7 @@ We'll know we're right when **the author and ≥5 other swing traders use it for
 | # | Milestone | Outcome | Status | Plan |
 |---|---|---|---|---|
 | 1 | Correct sizing engine | Every sizing rule (risk, rounding, NSE tick, caps, costs, R values) produces verified-correct results for the worked examples | complete | [.claude/plans/r2size-m1-sizing-engine.plan.md](../plans/r2size-m1-sizing-engine.plan.md) |
-| 2 | Usable calculator | A trader can enter a setup and copy the quantity, entry and stop in under 15 s on a phone | pending | — |
+| 2 | Usable calculator | A trader can enter a setup and copy the quantity, entry and stop in under 15 s on a phone | complete | [.claude/plans/r2size-m2-usable-calculator.plan.md](../plans/r2size-m2-usable-calculator.plan.md) |
 | 3 | Remembers the trader | Account profile with a staleness reminder, presets, shareable URL setups, Export/Import | pending | — |
 | 4 | Installable & offline | App installs on Android, iOS and desktop and works in airplane mode; trust page live; publicly deployed | pending | — |
 | 5 | Validated with users | Author + ≥5 traders using it weekly for 4 weeks; feedback captured to decide Phase 2 | pending | — |
@@ -112,7 +112,7 @@ Accepted from the architecture review. Full rationale in [r2size.architecture.md
 - Milestone 1 gate: ~30 hand-checked worked examples, property tests (e.g. actual risk ≤ budget), 100% branch coverage of the engine, mutation score ≥ 90%.
 
 ## Open Questions
-- [ ] Is the 15-second time-to-size target right? Validate after Milestone 2 by timing real sessions.
+- [ ] Is the 15-second time-to-size target right? Milestone 2 is built (a scripted run copies in under 5 s); now time real sessions on an iPhone and an Android phone.
 - [ ] Default stale-profile reminder interval: 7 days is assumed. Validate with users in Milestone 5.
 - [x] NSE tick-band boundaries — resolved 2026-10-05 from circular NSE/CMTR/67133 (see D5).
 

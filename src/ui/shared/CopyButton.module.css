@@ -1,0 +1,44 @@
+.button {
+  min-height: 48px;
+  min-width: 52px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-2);
+  white-space: nowrap;
+  transition:
+    background-color 0.12s,
+    border-color 0.12s;
+}
+
+.primary {
+  border: 0;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.primary:hover {
+  background: #fffaf0;
+}
+
+.ghost {
+  border: 1px solid var(--field-border);
+  background: transparent;
+  color: var(--text);
+}
+
+.ghost:hover {
+  background: var(--raised);
+}
+
+.button[data-state='copied'] {
+  color: var(--gain);
+}
+
+/* Green on the paper-white fill would fail contrast; the label change carries the meaning. */
+.primary[data-state='copied'] {
+  color: var(--bg);
+}
+
+.button[data-state='failed'] {
+  color: var(--loss);
+}

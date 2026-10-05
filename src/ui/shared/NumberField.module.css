@@ -1,0 +1,100 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 20px;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--s-3);
+  background: var(--field);
+  border: 1px solid var(--field-border);
+  border-radius: var(--r-2);
+  /* >= 16px stops iOS Safari zooming on focus */
+  font-size: 20px;
+  font-variant-numeric: tabular-nums lining-nums slashed-zero;
+  transition: border-color 0.12s;
+}
+
+.input::placeholder {
+  color: var(--text-3);
+  opacity: 1;
+}
+
+.input:hover {
+  border-color: var(--text-3);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 1px var(--focus);
+}
+
+.invalid,
+.invalid:hover {
+  border-color: var(--loss);
+}
+
+.withPrefix {
+  padding-left: 28px;
+}
+
+.withSuffix {
+  padding-right: 36px;
+}
+
+.prefix,
+.suffix {
+  position: absolute;
+  color: var(--text-3);
+  font-size: 15px;
+  pointer-events: none;
+}
+
+.prefix {
+  left: var(--s-3);
+}
+
+.suffix {
+  right: var(--s-3);
+}
+
+.hint,
+.warning,
+.error {
+  margin: 0;
+  font-size: 13px;
+}
+
+.hint {
+  color: var(--text-3);
+}
+
+.warning {
+  color: var(--caution);
+}
+
+.error {
+  color: var(--loss);
+}

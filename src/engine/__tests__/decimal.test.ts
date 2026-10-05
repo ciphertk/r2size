@@ -64,6 +64,22 @@ describe('toDecimalString', () => {
     [q(123456789n, 100n), 4, '1234567.8900'],
   ])('formats %o to %i places as %s (half away from zero)', (value, places, expected) => {
     expect(toDecimalString(value, places)).toBe(expected);
+    expect(toDecimalString(value, places, 'halfUp')).toBe(expected);
+  });
+
+  it.each([
+    // Risk is never understated: 0.999775% shows as 1.00%.
+    [q(39991n, 40000n), 2, '1.00'],
+    [q(1n, 3n), 2, '0.34'],
+    [q(1n, 201n), 2, '0.01'],
+    [q(201n, 2n), 2, '100.50'],
+    [q(19995n, 1n), 2, '19995.00'],
+    [q(-1n, 3n), 2, '-0.34'],
+    [q(0n), 2, '0.00'],
+    [q(5n, 2n), 0, '3'],
+    [q(21n, 10n), 0, '3'],
+  ])('rounds %o up to %i places as %s', (value, places, expected) => {
+    expect(toDecimalString(value, places, 'up')).toBe(expected);
   });
 
   it('round-trips through parseDecimal', () => {

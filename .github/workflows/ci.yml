@@ -23,6 +23,31 @@ jobs:
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm test:coverage
+      - run: pnpm build
+      - name: Bundle budgets (JS 90 KB, CSS 15 KB, fonts 30 KB)
+        run: pnpm size
+
+  e2e:
+    # Phone viewports: Pixel 7 (Chromium) and iPhone 14 (WebKit), including axe checks.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - run: pnpm test:e2e
+      - name: Upload screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright
+          path: |
+            test-results/
+            playwright-report/
 
   mutation:
     # The sizing engine's mutation gate (PRD Milestone 1): runs when the engine changes.

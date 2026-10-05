@@ -1,0 +1,51 @@
+/* Design tokens — .claude/prds/r2size.design.md. Dark theme only. */
+@font-face {
+  font-family: 'Plex Sans';
+  src: url('../../assets/fonts/plexsans-var-400-600.woff2') format('woff2');
+  font-weight: 400 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plex Mono';
+  src: url('../../assets/fonts/plexmono-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Warm graphite neutrals */
+  --bg: #121110;
+  --surface: #1a1916;
+  --raised: #23211d;
+  --field: #0d0c0b;
+  --line: #36332d;
+  --field-border: #706a5e; /* >= 3:1 on every surface (WCAG 1.4.11) */
+
+  /* Paper text */
+  --text: #ece6d9;
+  --text-2: #aba392;
+  --text-3: #948c7c; /* >= 4.5:1 on every surface */
+
+  /* Colour carries meaning only */
+  --gain: #6cc08e;
+  --loss: #ef7a5e;
+  --caution: #e8b04a;
+  --focus: #9cc3e6;
+
+  --font-ui: 'Plex Sans', system-ui, sans-serif;
+  --font-mono: 'Plex Mono', ui-monospace, monospace;
+
+  --r-1: 4px;
+  --r-2: 6px;
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+
+  --wide: 880px;
+}

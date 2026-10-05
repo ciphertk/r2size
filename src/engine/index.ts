@@ -3,7 +3,8 @@
  * computeSizing never throws; every problem comes back as an error code.
  */
 import type { FieldError, Warning } from './errors';
-import { div, gt, HUNDRED, mul, q } from './rational';
+import { parseDecimal } from './decimal';
+import { div, gt, HUNDRED, isPositive, mul, q } from './rational';
 import { buildRTable } from './r-table';
 import {
   bindingConstraint,
@@ -16,16 +17,64 @@ import {
 } from './size';
 import { computeStop } from './stop';
 import { autoTick, isOnTick, nearBandEdge, NSE_TICK_TABLE } from './tick-bands';
-import type { Binding, RawForm, SizingOutcome, TickInfo } from './types';
-import { validate } from './validate';
+import type { Binding, Rational, RawForm, SizingOutcome, StopInfo, TickInfo } from './types';
+import { PLACES, validate } from './validate';
 
 export type { ErrorCode, FieldError, Warning, WarningCode } from './errors';
 export type * from './types';
 export { NSE_TICK_TABLE } from './tick-bands';
 export { decimal, parseDecimal, toDecimalString } from './decimal';
+export type { Rounding } from './decimal';
+export { PLACES } from './validate';
 
 /** Risk above this % of equity is allowed but warned about. */
 const HIGH_RISK_PCT = q(5n);
+
+const tickInfo = (entry: Rational, override: Rational | undefined): TickInfo => ({
+  value: override ?? autoTick(entry),
+  source: override === undefined ? 'auto' : 'override',
+  bandsEffectiveFrom: NSE_TICK_TABLE.effectiveFrom,
+  nearBandEdge: override === undefined && nearBandEdge(entry),
+});
+
+export interface StopPreview {
+  readonly tick: TickInfo;
+  readonly stop?: StopInfo;
+}
+
+/** Values that make every non-stop field valid, so a preview depends only on entry, stop and tick. */
+const NEUTRAL: Partial<RawForm> = {
+  riskMode: 'percent',
+  riskPct: '1',
+  riskAmount: '',
+  equity: '1',
+  availableCash: '',
+  maxAllocationPct: '',
+  costPct: '',
+  targets: ['', '', ''],
+};
+
+/**
+ * The tick and stop as soon as entry and stop are valid, before equity or risk are filled in,
+ * so the trader sees "Stop 93.00" while still typing. Null until entry is a valid price.
+ */
+export const previewStop = (raw: RawForm): StopPreview | null => {
+  const validation = validate({ ...raw, ...NEUTRAL });
+  if (validation.ok) {
+    const tick = tickInfo(validation.input.entry, validation.input.tickOverride);
+    const stop = computeStop(validation.input.entry, validation.input.stop, tick.value);
+    return stop.ok ? { tick, stop: stop.stop } : { tick };
+  }
+  const entry = parseDecimal(raw.entry, PLACES.price);
+  if (entry.kind !== 'value' || !isPositive(entry.value)) return null;
+  const override = parseDecimal(raw.tick, PLACES.price);
+  return {
+    tick: tickInfo(
+      entry.value,
+      override.kind === 'value' && isPositive(override.value) ? override.value : undefined,
+    ),
+  };
+};
 
 const ZERO_QTY_CODE = {
   risk: 'qtyZeroRisk',
@@ -38,13 +87,7 @@ export const computeSizing = (raw: RawForm): SizingOutcome => {
   if (!validation.ok) return { ok: false, errors: validation.errors, partial: {} };
   const { input, nonBlocking } = validation;
 
-  const auto = input.tickOverride === undefined;
-  const tick: TickInfo = {
-    value: input.tickOverride ?? autoTick(input.entry),
-    source: auto ? 'auto' : 'override',
-    bandsEffectiveFrom: NSE_TICK_TABLE.effectiveFrom,
-    nearBandEdge: auto && nearBandEdge(input.entry),
-  };
+  const tick = tickInfo(input.entry, input.tickOverride);
 
   const stopOutcome = computeStop(input.entry, input.stop, tick.value);
   if (!stopOutcome.ok)
@@ -100,6 +143,7 @@ export const computeSizing = (raw: RawForm): SizingOutcome => {
   return {
     ok: true,
     result: {
+      entry: input.entry,
       tick,
       stop,
       perShare,

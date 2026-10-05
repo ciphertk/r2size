@@ -47,11 +47,25 @@ export const decimal = (literal: string): Rational => {
   return result.value;
 };
 
-/** Fixed-point string, rounded half away from zero. For tests and the Guide; the UI formats in domain/format.ts. */
-export const toDecimalString = (value: Rational, places: number): string => {
+/**
+ * How to round to the last displayed digit:
+ * - 'halfUp': half away from zero (money, prices, percentages)
+ * - 'up': away from zero, so a displayed risk is never smaller than the real one (M2-D4)
+ */
+export type Rounding = 'halfUp' | 'up';
+
+/** Exact fixed-point string, e.g. 19995.5 → "19995.50". domain/format.ts adds grouping and symbols. */
+export const toDecimalString = (
+  value: Rational,
+  places: number,
+  rounding: Rounding = 'halfUp',
+): string => {
   const scale = 10n ** BigInt(places);
   const magnitude = value.n < 0n ? -value.n : value.n;
-  const scaled = (2n * magnitude * scale + value.d) / (2n * value.d);
+  const scaled =
+    rounding === 'up'
+      ? (magnitude * scale + value.d - 1n) / value.d
+      : (2n * magnitude * scale + value.d) / (2n * value.d);
   const digits = scaled.toString().padStart(places + 1, '0');
   const sign = value.n < 0n && scaled !== 0n ? '-' : '';
   if (places === 0) return sign + digits;

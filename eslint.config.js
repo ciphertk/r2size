@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
 const networkGlobals = ['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource'].map((name) => ({
@@ -42,16 +43,84 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.strict,
   {
-    files: ['**/*.{js,mjs,ts}'],
+    files: ['**/*.{js,mjs,ts,tsx}'],
     languageOptions: { globals: { ...globals.node } },
   },
   {
-    files: ['src/**/*.ts'],
+    files: ['src/**/*.{ts,tsx}', 'e2e/**/*.ts'],
+    languageOptions: { globals: { ...globals.browser } },
+  },
+  {
+    files: ['src/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-globals': ['error', ...networkGlobals],
       'no-restricted-properties': [
         'error',
         { object: 'navigator', property: 'sendBeacon', message: 'No network requests (ADR-006).' },
+      ],
+    },
+  },
+  {
+    files: ['src/**/*.tsx'],
+    ...reactHooks.configs.flat['recommended-latest'],
+  },
+  // Number formatting lives in one place, so every figure follows the same en-IN rules.
+  {
+    files: ['src/{domain,state,infra,ui}/**/*.{ts,tsx}'],
+    ignores: ['src/domain/format.ts', 'src/**/__tests__/**'],
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        ...networkGlobals,
+        { name: 'Intl', message: 'Format numbers with src/domain/format.ts.' },
+      ],
+      'no-restricted-properties': [
+        'error',
+        { object: 'navigator', property: 'sendBeacon', message: 'No network requests (ADR-006).' },
+        { property: 'toLocaleString', message: 'Format numbers with src/domain/format.ts.' },
+      ],
+    },
+  },
+  // Layer boundaries (architecture §2): engine ← domain ← state ← ui; infra never imports ui or state.
+  {
+    files: ['src/domain/**/*.ts'],
+    ignores: ['src/domain/**/__tests__/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^[.][.]/(state|infra|ui)(/|$)',
+              message: 'domain may import only the engine.',
+            },
+            { regex: '^react', message: 'domain is framework-free.' },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/state/**/*.ts'],
+    ignores: ['src/**/__tests__/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        { patterns: [{ regex: '^[.][.]/ui(/|$)', message: 'state never imports ui.' }] },
+      ],
+    },
+  },
+  {
+    files: ['src/infra/**/*.ts'],
+    ignores: ['src/**/__tests__/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { regex: '^[.][.]/(ui|state)(/|$)', message: 'infra never imports ui or state.' },
+          ],
+        },
       ],
     },
   },

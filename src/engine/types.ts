@@ -125,6 +125,7 @@ export interface RRow {
 }
 
 export interface SizingResult {
+  readonly entry: Rational;
   readonly tick: TickInfo;
   readonly stop: StopInfo;
   readonly perShare: PerShare;
