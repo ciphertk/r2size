@@ -14,3 +14,6 @@ playwright-report/
 .agents/
 .claude/skills/
 skills-lock.json
+
+# Local architecture diagrams (archify): kept on this machine, not in the repo.
+.archify/
