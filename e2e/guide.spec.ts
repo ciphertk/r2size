@@ -1,5 +1,5 @@
-import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { seriousViolations } from './support/axe';
 
 test('an info tip opens its Guide entry, and Back returns with the setup', async ({ page }) => {
   await page.goto('/#v=1&sym=RAYMOND&e=100&sm=pct&sp=7&rm=pct&r=1');
@@ -18,10 +18,7 @@ test('the Guide computes the worked example and passes axe', async ({ page }) =>
   const steps = page.getByRole('table', { name: 'Worked example, step by step' });
   await expect(steps.getByRole('row', { name: /^Quantity/ })).toContainText('2,758 shares');
   await expect(page.getByText(/effective 15 Apr 2025/)).toBeVisible();
-  const violations = (await new AxeBuilder({ page }).analyze()).violations.filter(
-    (v) => v.impact === 'serious' || v.impact === 'critical',
-  );
-  expect(violations).toEqual([]);
+  expect(await seriousViolations(page)).toEqual([]);
 });
 
 test('"Back to the calculator" works when the Guide was opened directly', async ({ page }) => {

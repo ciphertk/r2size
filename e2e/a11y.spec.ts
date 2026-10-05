@@ -1,12 +1,9 @@
-import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { seriousViolations } from './support/axe';
 
 test('has no serious or critical axe violations, empty and filled', async ({ page }) => {
   await page.goto('/');
-  const scan = async () =>
-    (await new AxeBuilder({ page }).analyze()).violations.filter(
-      (v) => v.impact === 'serious' || v.impact === 'critical',
-    );
+  const scan = () => seriousViolations(page);
 
   expect(await scan()).toEqual([]);
 

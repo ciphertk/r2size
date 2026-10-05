@@ -1,6 +1,6 @@
-import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
+import { seriousViolations } from './support/axe';
 
 const equity = (page: Page) => page.getByLabel('Equity', { exact: true });
 const result = (page: Page) => page.getByRole('complementary', { name: 'Result' });
@@ -86,7 +86,8 @@ test('keeps the setup in the link, and a shared link never carries the profile',
   await page.getByLabel('Risk % of equity').fill('1');
   await expect(result(page)).toContainText('2,857');
 
-  await expect.poll(() => page.evaluate(() => location.hash)).toContain('e=100');
+  // Wait for the whole setup (written 300 ms after typing stops), not just the first field.
+  await expect.poll(() => page.evaluate(() => location.hash)).toMatch(/(^|&)r=1(&|$)/);
   const hash = await page.evaluate(() => location.hash);
   expect(hash).not.toMatch(/(eq|equity|cash)=/);
   expect(hash).not.toContain('2000000');
@@ -167,16 +168,10 @@ test('rejects a file that is not a backup', async ({ page }, testInfo) => {
 test('dialogs pass axe with no serious or critical issues', async ({ page }) => {
   await page.goto('/');
   await openSettings(page);
-  const violations = (await new AxeBuilder({ page }).analyze()).violations.filter(
-    (v) => v.impact === 'serious' || v.impact === 'critical',
-  );
-  expect(violations).toEqual([]);
+  expect(await seriousViolations(page)).toEqual([]);
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'New preset from this setup' }).click();
-  const inEditor = (await new AxeBuilder({ page }).analyze()).violations.filter(
-    (v) => v.impact === 'serious' || v.impact === 'critical',
-  );
-  expect(inEditor).toEqual([]);
+  expect(await seriousViolations(page)).toEqual([]);
 });
 
 // Regression: leaving Equity saved the profile with cash still blank, and the sync for

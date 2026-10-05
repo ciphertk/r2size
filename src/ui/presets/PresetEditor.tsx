@@ -17,8 +17,8 @@ export interface PresetEditorProps {
 }
 
 const STOP_KINDS = [
-  { value: 'percent', label: '% below entry' },
-  { value: 'atr', label: 'ATR multiple' },
+  { value: 'percent', label: '% below' },
+  { value: 'atr', label: 'ATR ×' },
 ] as const;
 
 /** Create or edit a preset. Only D10 fields: never a stop price or an ATR value. */

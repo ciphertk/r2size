@@ -14,7 +14,8 @@ module.exports = {
             startServerReadyTimeout: 60000,
           }),
       url: [`${base ?? 'http://127.0.0.1:8788'}/`, `${base ?? 'http://127.0.0.1:8788'}/guide`],
-      numberOfRuns: 1,
+      // Median of three: one run on a shared CI machine is too noisy to gate on.
+      numberOfRuns: 3,
       settings: { chromeFlags: '--headless=new --no-sandbox' },
     },
     assert: {

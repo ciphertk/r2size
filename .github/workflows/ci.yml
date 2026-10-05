@@ -40,7 +40,13 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium webkit
-      - run: pnpm test:e2e
+      - name: Chromium (Pixel 7, desktop)
+        run: pnpm exec playwright test --project=pixel-7 --project=desktop
+      # Linux WebKit hangs or crashes under parallel load on shared runners (CI run 37323852960);
+      # the same flows pass reliably one at a time, so the iPhone project runs on its own.
+      - name: WebKit (iPhone 14), one worker
+        if: always()
+        run: pnpm exec playwright test --project=iphone-14 --workers=1
       - name: Upload screenshots and report
         if: always()
         uses: actions/upload-artifact@v4

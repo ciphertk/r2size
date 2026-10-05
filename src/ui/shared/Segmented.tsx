@@ -1,5 +1,4 @@
-import { Radio } from '@base-ui/react/radio';
-import { RadioGroup } from '@base-ui/react/radio-group';
+import { useId } from 'react';
 import styles from './Segmented.module.css';
 
 export interface SegmentedOption<T extends string> {
@@ -14,28 +13,37 @@ export interface SegmentedProps<T extends string> {
   readonly onValueChange: (value: T) => void;
 }
 
-/** A radio group drawn as a segmented control: real radio semantics, arrow-key navigation. */
+/**
+ * A radio group drawn as pills, built on native radio inputs (architecture §8): real radio
+ * semantics and arrow-key navigation from the browser, with no JavaScript. Base UI's RadioGroup
+ * measured the page layout on mount, which cost ~0.5 s of start-up on a throttled phone.
+ */
 export function Segmented<T extends string>({
   label,
   value,
   options,
   onValueChange,
 }: SegmentedProps<T>) {
+  const name = useId();
   return (
-    <RadioGroup
-      aria-label={label}
-      className={styles.group}
-      value={value}
-      onValueChange={(next) => {
-        const match = options.find((option) => option.value === next);
-        if (match) onValueChange(match.value);
-      }}
-    >
+    <div role="radiogroup" aria-label={label} className={styles.group}>
       {options.map((option) => (
-        <Radio.Root key={option.value} value={option.value} className={styles.segment}>
+        <label
+          key={option.value}
+          className={styles.segment}
+          data-checked={option.value === value ? '' : undefined}
+        >
+          <input
+            type="radio"
+            className={styles.input}
+            name={name}
+            value={option.value}
+            checked={option.value === value}
+            onChange={() => onValueChange(option.value)}
+          />
           {option.label}
-        </Radio.Root>
+        </label>
       ))}
-    </RadioGroup>
+    </div>
   );
 }
