@@ -29,7 +29,7 @@ interface Snapshot {
 }
 
 /** For positioning only. */
-export const toNumber = (r: Rational): number => Number(r.n) / Number(r.d);
+const toNumber = (r: Rational): number => Number(r.n) / Number(r.d);
 const parseTyped = (typed: string): number => Number.parseFloat(typed.replace(/,/g, ''));
 const fromPaise = (paise: number): string =>
   `${Math.floor(paise / 100)}.${String(paise % 100).padStart(2, '0')}`;

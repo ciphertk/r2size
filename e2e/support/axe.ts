@@ -7,6 +7,11 @@ import type { Page } from '@playwright/test';
  * low contrast (seen on slow Linux WebKit in CI).
  */
 export const seriousViolations = async (page: Page) => {
+  // Two frames first: a transition that was just triggered only shows up in getAnimations() once
+  // it has started.
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  );
   await page.waitForFunction(() =>
     document.getAnimations().every((animation) => animation.playState !== 'running'),
   );

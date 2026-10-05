@@ -1,9 +1,9 @@
 import { CURRENT_SCHEMA_VERSION, type Preset, type StoredDoc } from './schema';
 
-export const DEFAULT_STALE_DAYS = 7;
+const DEFAULT_STALE_DAYS = 7;
 
 /** Seeded on first run and after a reset (architecture §4). */
-export const seedPresets = (now: Date): Preset[] => {
+const seedPresets = (now: Date): Preset[] => {
   const at = now.toISOString();
   return [
     {

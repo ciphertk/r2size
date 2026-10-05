@@ -57,7 +57,6 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
-    "@phosphor-icons/react": "^2.1.10",
     "preact": "^11.0.0",
     "react": "npm:@preact/compat@^18.3.2",
     "react-dom": "npm:@preact/compat@^18.3.2",

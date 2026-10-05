@@ -3,9 +3,5 @@ coverage/
 reports/
 .stryker-tmp/
 .claude/
-.agents/
-design/
 docs/
 *.md
-.wrangler/
-.lighthouseci/

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-/** The design mockup's setup (and the M1 worked example "mockup"), typed as a trader would. */
+/** The M1 worked example "mockup", typed as a trader would. */
 const enterMockupSetup = async (page: Page) => {
   await page.getByLabel('Equity', { exact: true }).fill('2000000');
   await page.getByLabel('Available cash (optional)').fill('640000');

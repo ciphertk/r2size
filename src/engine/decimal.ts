@@ -13,7 +13,7 @@ export type ParseResult =
   | { readonly kind: 'empty' }
   | { readonly kind: 'error'; readonly code: ParseError };
 
-export const MAX_INTEGER_DIGITS = 12;
+const MAX_INTEGER_DIGITS = 12;
 
 /** Grouping commas, the rupee sign and whitespace (\s covers no-break spaces) are ignored. */
 const IGNORED = /[,₹\s]/g;

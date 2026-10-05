@@ -14,10 +14,8 @@ import { copyText } from '../../infra/clipboard';
 import { formErrors } from '../../state/selectors';
 import { CopyButton } from '../shared/CopyButton';
 import { firstTarget } from './first-target';
-import { PriceLadder } from './PriceLadder';
+import { ScenariosTable } from './ScenariosTable';
 import styles from './ResultPanel.module.css';
-
-export { firstTarget };
 
 const BINDING_TEXT = {
   risk: 'Risk-bound',
@@ -49,7 +47,7 @@ export function ResultPanel({ outcome, symbol, shareLink }: ResultPanelProps) {
           </p>
           {/* The ladder pane draws these; the table gives screen readers the same numbers. */}
           <div className="vh">
-            <PriceLadder rows={outcome.result.rTable} />
+            <ScenariosTable rows={outcome.result.rTable} />
           </div>
           <div className={styles.share}>
             <CopyButton what="Setup link" text={shareLink}>

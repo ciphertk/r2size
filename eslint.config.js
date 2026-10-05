@@ -48,7 +48,6 @@ export default tseslint.config(
       '.wrangler/',
       '.lighthouseci/',
       'dist/',
-      'design/',
     ],
   },
   js.configs.recommended,

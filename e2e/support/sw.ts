@@ -16,8 +16,7 @@ export const loadControlled = async (page: Page, path = '/'): Promise<void> => {
     .toBe(true);
 };
 
-export const SETUP_LINE =
-  'raymond 100 sl 7% risk 1% eq 2000000 cash 640000 cap 20% cost 0.25% t 118.40';
+const SETUP_LINE = 'raymond 100 sl 7% risk 1% eq 2000000 cash 640000 cap 20% cost 0.25% t 118.40';
 
 export const enterSetup = async (page: Page): Promise<void> => {
   await page.getByRole('textbox', { name: 'Quick setup' }).fill(SETUP_LINE);

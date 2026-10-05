@@ -21,7 +21,7 @@ export interface ShareableSetup {
   readonly targets: readonly [string, string, string];
 }
 
-export const SHARE_VERSION = '1';
+const SHARE_VERSION = '1';
 const MAX_HASH_LENGTH = 512;
 const SYMBOL = /^[A-Z0-9&.-]{1,20}$/;
 

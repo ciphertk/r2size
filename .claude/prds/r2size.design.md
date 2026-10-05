@@ -2,7 +2,7 @@
 
 *Status: ACCEPTED (2026-10-05, v2). Dark theme only. Related: [r2size.prd.md](r2size.prd.md), [r2size.architecture.md](r2size.architecture.md).*
 
-*History: v1 ("graphite order ticket": IBM Plex, warm graphite, no accent hue, two columns; mockup in `design/mockup.html`) was built in M2–M3. On 2026-10-05 the owner judged it "not good" and asked for a redesign. Prototype rounds compared Terminal, Native, Workbench, Sentence, Ladder, Living table, Price rail and Three-pane variants. The owner chose **Three-pane**: Workbench's command bar and property list, plus a draggable price ladder. v1's typography and colour rules below are replaced; its number rules, accessibility rules and component choices still stand.*
+*History: v1 ("graphite order ticket": IBM Plex, warm graphite, no accent hue, two columns; its mockup is in git history before commit "Clean up") was built in M2–M3. On 2026-10-05 the owner judged it "not good" and asked for a redesign. Prototype rounds compared Terminal, Native, Workbench, Sentence, Ladder, Living table, Price rail and Three-pane variants. The owner chose **Three-pane**: Workbench's command bar and property list, plus a draggable price ladder. v1's typography and colour rules below are replaced; its number rules, accessibility rules and component choices still stand.*
 
 ## Direction
 

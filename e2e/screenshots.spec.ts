@@ -1,8 +1,8 @@
 import { test } from '@playwright/test';
 
 /**
- * Captures the filled-in calculator at phone and desktop sizes for a by-eye check against
- * design/mockup.html (M2 Task 9). Not a pixel diff; the images are CI artifacts.
+ * Captures the filled-in calculator at phone and desktop sizes for a by-eye review of the
+ * design (design doc v2). Not a pixel diff; the images are CI artifacts.
  */
 test('screenshots for visual review', async ({ page }, testInfo) => {
   await page.goto('/');

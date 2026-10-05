@@ -24,7 +24,7 @@ The sizing-rule decisions (D1–D12) are in [section 11](#11-sizing-decisions-an
 | Styling | Plain CSS with custom properties and CSS Modules, **dark theme only** (`color-scheme: dark`), tokens from [r2size.design.md](r2size.design.md), `font-variant-numeric: tabular-nums` | No runtime cost, works under `style-src 'self'` | Tailwind (one more toolchain), CSS-in-JS (needs a runtime and fights the security policy) |
 | Fonts | **Geist** + **Geist Mono** (variable, cut to 400–600), subset to Latin + ₹ + symbols, self-hosted woff2 (≈ 21 KB total) | ₹ glyph verified with fontTools; the native voice of the Workbench direction chosen 2026-10-05 (design doc v2); digits made tabular in CSS | IBM Plex (v1 choice, replaced with the redesign), Inter |
 | UI primitives | **Base UI** (`@base-ui/react`, MIT): Popover, Dialog, AlertDialog, Toast, Collapsible, RadioGroup/ToggleGroup, inside `<CSPProvider disableStyleElements>` | Headless, accessible, can run with no injected `<style>` tags | Radix (Select/ScrollArea inject `<style>`, breaking CSP and Trusted Types), shadcn/ui (Tailwind + generic look), React Aria (heavier; its NumberField uses floats) |
-| Icons | **Phosphor Icons** (`@phosphor-icons/react`, MIT), per-icon imports, about 6 icons | Consistent stroke, tree-shakable | Lucide (the default shadcn look) |
+| Icons | None: the few glyphs (settings, chevrons, grip dots) are inline SVG or CSS | No dependency for six icons | Phosphor (planned, never used; removed) |
 | Validation of untrusted data | **Valibot** | A few KB after tree-shaking. Used for stored data, backups and URL params | Zod (larger), hand-written checks |
 | PWA | **vite-plugin-pwa**, `generateSW` mode, `registerType: 'prompt'`, registered from a module (no inline script) | Full Workbox precache and a "reload when the user asks" update flow | Hand-written service worker, `autoUpdate` (breaks "never reload mid-calculation") |
 | Unit and component tests | **Vitest 4.1** (`node` env for the engine, `happy-dom` for UI), **fast-check**, **Testing Library** | One runner for everything. Pinned to 4.1: Stryker's Vitest runner silently fails to activate mutants under Vitest 5 (see the M1 plan's implementation notes) | Jest |
@@ -44,50 +44,39 @@ The sizing-rule decisions (D1–D12) are in [section 11](#11-sizing-decisions-an
 
 ```
 r2size/
-  index.html                      # no inline script or style
-  public/
-    _headers                      # security policy + caching rules
-    fonts/                        # geist-var-400-600.woff2, geistmono-var-400-600.woff2 (subset), OFL-Geist.txt
-    icons/ (192, 512, maskable-512, apple-touch-icon-180), favicon.svg, robots.txt
+  index.html                      # no inline script or style; the build adds the CSP <meta>
+  config/security-policy.ts       # the one CSP/headers source: <meta> + dist/_headers (M4-D8)
+  public/                         # favicon.svg, icons/ (192, 512, maskable, apple-touch, favicon-32), og.png
+  scripts/
+    check-size.mjs                # initial JS/CSS + font budgets
+    verify-production.mjs         # after a deploy: live build + headers
+    make-icons.mjs, brand/        # brand mark → outlines (make_brand.py, fontTools) → PNG icons
+  docs/release-checklist.md, docs/sources/CMTR67133.pdf (the NSE tick circular)
   src/
     engine/                       # PURE: no DOM, no storage, no Intl, no Number arithmetic on money
-      rational.ts                 # exact fractions on BigInt: add/sub/mul/div/cmp/floor/min
-      decimal.ts                  # decimal string -> fraction (exact), fraction -> fixed-decimal string
-      tick-bands.ts               # dated NSE table + autoTick() + nearBandEdge()
-      stop.ts                     # stop by price/%/ATR + rounding to the tick grid
-      size.ts                     # budget, quantities, caps, binding constraint, actuals
-      r-table.ts
-      validate.ts                 # raw strings -> SizingInput | FieldError[]
-      types.ts, errors.ts (codes only, no wording), index.ts (computeSizing)
+      rational.ts, decimal.ts, tick-bands.ts, stop.ts, size.ts, r-table.ts, validate.ts,
+      types.ts, errors.ts (codes only, no wording), index.ts (computeSizing, previewStop)
       __fixtures__/worked-examples.ts   # single source, also rendered in the Guide
-      __tests__/  worked-examples.test.ts, properties.test.ts, reference-oracle.ts, decimal.test.ts
     domain/                       # PURE, may import engine only
-      schema.ts                   # Valibot schemas: stored data, backup, share URL
-      migrations.ts               # step functions v(n) -> v(n+1)
-      share-url.ts                # encode/decode ShareableSetup
-      backup.ts                   # build and parse export files
-      staleness.ts                # days since update, in device-local calendar days
-      format.ts                   # en-IN display formatting (Intl; no DOM)
-      copy-text.ts                # plain-digit copies + "Copy all" line
-      presets-defaults.ts
-    infra/                        # browser side effects, no React
-      storage.ts                  # localStorage repository with fallback on corrupt data
-      persist.ts                  # navigator.storage.persist()
-      clipboard.ts, download.ts (Blob / navigator.share with files), url-sync.ts, sw.ts
-    state/                        # stores built on useSyncExternalStore + form reducer
-      app-store.ts, form-reducer.ts, selectors.ts
+      schema.ts, migrations.ts, defaults.ts, presets.ts, share-url.ts, backup.ts,
+      staleness.ts, format.ts (all en-IN formatting), copy-text.ts, messages.ts (all wording)
+    infra/                        # browser side effects, never throw, no React
+      storage.ts, persist.ts, clipboard.ts, download.ts, url-hash.ts, route.ts,
+      sw.ts (update flow), install.ts, trusted-types.ts
+    state/                        # useSyncExternalStore store + form reducer
+      app-store.ts, form-reducer.ts, selectors.ts, startup.ts, command.ts (quick-setup line)
     ui/
-      app/ App.tsx, router.ts (paths "/" and "/guide"; Guide loaded on demand)
-      calculator/ CalculatorScreen, InputsPanel, StopField, RiskField, ResultsPanel, RTable, BindingNotice, CopyBar
-      profile/ ProfileBar (staleness prompt, one-tap Update)
-      presets/ PresetPicker, PresetEditor
-      settings/ SettingsSheet (stale days, export/import, reset)
-      guide/ GuidePage, glossary.ts, WorkedExample.tsx (runs the engine on the fixture)
-      shared/ NumberField, Segmented (radio group), InfoTip, CopyButton, Banner, LiveRegion
-      styles/ tokens.css, base.css
+      app/        App (header, routes, lazy Guide), UpdateBar, Wordmark + brand-paths, use-route
+      calculator/ CalculatorScreen (three panes), CommandBar, InputsPanel, LadderPane + use-ladder,
+                  ResultPanel (order card), ScenariosTable (screen readers), Dock, field-props
+      guide/      GuidePage, WorkedExample (runs the engine on the fixture), glossary
+      presets/    PresetChips, PresetEditor;  profile/ ProfileStrip;  settings/ SettingsSheet
+      shared/     NumberField, Segmented (native radios), InfoTip, CopyButton, NoticeBar, Sheet
+      styles/     tokens.css, base.css
     main.tsx
-  e2e/ calculator.spec.ts, offline.spec.ts, no-network.spec.ts, update-flow.spec.ts, share-url.spec.ts, backup.spec.ts, a11y.spec.ts
-  lighthouserc.cjs, stryker.config.mjs, vitest.config.ts (with projects), playwright.config.ts
+  e2e/  calculator, workbench, remembers, a11y, routing, guide, offline, no-network,
+        update-flow, screenshots (+ support/)
+  lighthouserc.cjs, stryker.config.mjs, vitest.config.ts, playwright.config.ts
 ```
 
 **Boundary rules (ESLint `no-restricted-imports` / `eslint-plugin-boundaries`):**
@@ -364,7 +353,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
   - Individual values are plain digits (`2857`, `100.00`, always 2 decimals) for broker fields.
   - "Copy all" is a human-readable line (₹ and commas allowed) for notes/chat; symbol omitted when blank.
   - Each button shows "Copied ✓" and announces via a polite live region.
-- **Theme:** dark only (`color-scheme: dark`, `<meta name="color-scheme" content="dark">`). No toggle. Visual direction, tokens, type scale and layout are in [r2size.design.md](r2size.design.md); reference mockup in `design/mockup.html`.
+- **Theme:** dark only (`color-scheme: dark`, `<meta name="color-scheme" content="dark">`). No toggle. Visual direction, tokens, type scale and layout are in [r2size.design.md](r2size.design.md).
 - **Components:** Base UI primitives styled with our tokens (see the design doc's component table). Numeric inputs are our own `NumberField` on a native input, because Base UI's and React Aria's NumberField parse to floats.
 - **Accessibility:**
   - every input has a `<label>`; errors linked via `aria-describedby` + `aria-invalid`

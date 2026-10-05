@@ -170,6 +170,8 @@ test('dialogs pass axe with no serious or critical issues', async ({ page }) => 
   await openSettings(page);
   expect(await seriousViolations(page)).toEqual([]);
   await page.keyboard.press('Escape');
+  // Settings must be fully closed, or its fading backdrop dims the page behind the next scan.
+  await expect(page.getByRole('dialog', { name: 'Settings & data' })).toBeHidden();
   await page.getByRole('button', { name: 'New preset from this setup' }).click();
   expect(await seriousViolations(page)).toEqual([]);
 });

@@ -29,19 +29,15 @@ const below100: Bound = (x) => isPositive(x) && cmp(x, HUNDRED) < 0;
 const costRange: Bound = (x) => cmp(x, TEN) < 0;
 
 export const MoneySchema = decimalString(PLACES.price, positive, 'Must be a positive amount.');
-export const RiskPctSchema = decimalString(
-  PLACES.percent,
-  upTo100,
-  'Use more than 0% and at most 100%.',
-);
-export const StopPctSchema = decimalString(
+const RiskPctSchema = decimalString(PLACES.percent, upTo100, 'Use more than 0% and at most 100%.');
+const StopPctSchema = decimalString(
   PLACES.percent,
   below100,
   'Use more than 0% and less than 100%.',
 );
-export const AtrMultipleSchema = decimalString(PLACES.multiple, positive, 'Must be more than 0.');
-export const AllocationPctSchema = RiskPctSchema;
-export const CostPctSchema = decimalString(
+const AtrMultipleSchema = decimalString(PLACES.multiple, positive, 'Must be more than 0.');
+const AllocationPctSchema = RiskPctSchema;
+const CostPctSchema = decimalString(
   PLACES.percent,
   costRange,
   'Use from 0% up to, but not including, 10%.',
@@ -49,14 +45,14 @@ export const CostPctSchema = decimalString(
 
 const Timestamp = v.pipe(v.string(), v.isoTimestamp());
 
-export const ProfileSchema = v.object({
+const ProfileSchema = v.object({
   equity: v.nullable(MoneySchema),
   availableCash: v.nullable(MoneySchema),
   lastUpdated: v.nullable(Timestamp),
 });
 
 /** A preset never holds a stop price or ATR value: those belong to one stock (D10). */
-export const PresetStopSchema = v.variant('kind', [
+const PresetStopSchema = v.variant('kind', [
   v.object({ kind: v.literal('percent'), pct: StopPctSchema }),
   v.object({ kind: v.literal('atr'), multiple: AtrMultipleSchema }),
 ]);
@@ -64,7 +60,7 @@ export const PresetStopSchema = v.variant('kind', [
 export const PRESET_NAME_MAX = 40;
 export const PRESETS_MAX = 50;
 
-export const PresetNameSchema = v.pipe(
+const PresetNameSchema = v.pipe(
   v.string(),
   v.trim(),
   v.minLength(1, 'Give the preset a name.'),
@@ -86,7 +82,7 @@ export const PresetSchema = v.object({
   updatedAt: Timestamp,
 });
 
-export const SettingsSchema = v.object({
+const SettingsSchema = v.object({
   staleDays: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(90)),
   defaultPresetId: v.nullable(v.string()),
   persistRequested: v.boolean(),
