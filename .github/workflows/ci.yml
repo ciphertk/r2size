@@ -11,6 +11,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -30,7 +31,26 @@ jobs:
   e2e:
     # Pixel 7 (Chromium), iPhone 14 (WebKit) and a 1440 px desktop (three-pane layout), with axe,
     # plus the offline, update-flow and no-network specs (service-worker specs run on Chromium).
+    #
+    # Runs inside Playwright's own image: browsers and their Linux libraries are preinstalled, so
+    # there is no `playwright install --with-deps` step (its apt-get hung for 30+ minutes in CI run
+    # 37329382936). The image tag must match @playwright/test in package.json.
+    name: e2e (${{ matrix.name }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --user 1001
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: chromium
+            args: --project=pixel-7 --project=desktop
+          # Linux WebKit hangs or crashes under parallel load (CI run 37323852960); the same flows
+          # pass reliably one at a time, so the iPhone project gets its own job and one worker.
+          - name: webkit
+            args: --project=iphone-14 --workers=1
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -39,19 +59,12 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium webkit
-      - name: Chromium (Pixel 7, desktop)
-        run: pnpm exec playwright test --project=pixel-7 --project=desktop
-      # Linux WebKit hangs or crashes under parallel load on shared runners (CI run 37323852960);
-      # the same flows pass reliably one at a time, so the iPhone project runs on its own.
-      - name: WebKit (iPhone 14), one worker
-        if: always()
-        run: pnpm exec playwright test --project=iphone-14 --workers=1
+      - run: pnpm exec playwright test ${{ matrix.args }}
       - name: Upload screenshots and report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright
+          name: playwright-${{ matrix.name }}
           path: |
             test-results/
             playwright-report/
@@ -60,6 +73,7 @@ jobs:
     # Performance, accessibility and best practices >= 0.9, on the build served by
     # `wrangler pages dev` so the real Cloudflare _headers apply (M4-D9).
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
