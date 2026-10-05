@@ -11,16 +11,27 @@ Run this before and after every public deploy. Everything up to "Deploy" is auto
 5. `pnpm lhci` (performance, accessibility and best practices ≥ 0.9 on `wrangler pages dev`)
 6. If the engine changed: `pnpm test:mutation` (≥ 90%)
 
-## Deploy
+## Deploy (CI, with approval)
+
+Push to `master`. CI runs check, e2e (Chromium and iPhone) and Lighthouse. When **all** are green, the `deploy` job waits in the GitHub environment **production** for the owner's approval: open the run in Actions and click **Review deployments → Approve and deploy**. It then:
+
+1. builds and uploads to the `r2size` Cloudflare Pages project (`wrangler pages deploy`, commit hash attached);
+2. checks that the live site serves this build with its security headers (`scripts/verify-production.mjs`);
+3. runs the no-network spec against https://r2size.pages.dev.
+
+A red check means no deploy is offered. Secrets: `CLOUDFLARE_API_TOKEN` (repo secret, Cloudflare Pages: Edit only) and `CLOUDFLARE_ACCOUNT_ID` (repo variable).
+
+Manual fallback (same result, from a logged-in machine):
 
 ```bash
 pnpm build
 pnpm exec wrangler pages deploy dist --project-name r2size --branch master
+node scripts/verify-production.mjs
 ```
 
-Direct upload on purpose: nothing is published by a push alone (M4-D11). The project already exists, so no `--force` is needed. (wrangler delegates `pages project create` for a *new* project to Workers unless `--force` is passed; that was a one-time step on 2026-10-05.)
+The project already exists, so no `--force` is needed. (wrangler delegates `pages project create` for a *new* project to Workers unless `--force` is passed; that was a one-time step on 2026-10-05.)
 
-## After deploying
+## After deploying (CI does 1 and 2; run 3 by hand when it matters)
 
 1. Headers are live:
    ```bash

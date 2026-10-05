@@ -117,3 +117,45 @@ jobs:
         run: pnpm install --frozen-lockfile
       - if: steps.changed.outputs.engine == 'true'
         run: pnpm test:mutation
+
+  deploy:
+    # Publishes to https://r2size.pages.dev, only for pushes to master, only when every check
+    # above is green, and only after the owner approves the run in GitHub (environment
+    # "production", required reviewer). Then verifies the live site.
+    needs: [check, e2e, lighthouse]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Playwright's image, so the production no-network check can run without installing browsers.
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --user 1001
+    environment:
+      name: production
+      url: https://r2size.pages.dev
+    # One deploy at a time; a newer approved run waits for the current one instead of racing it.
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        # Only the commit hash is passed: putting the commit message into a shell command would
+        # let quotes or backticks in a message break (or inject into) the deploy step.
+        run: pnpm exec wrangler pages deploy dist --project-name r2size --branch master --commit-hash "$GITHUB_SHA"
+      - name: Live site serves this build with its security headers
+        run: node scripts/verify-production.mjs https://r2size.pages.dev
+      - name: Nothing leaves the device on production
+        env:
+          BASE_URL: https://r2size.pages.dev
+        run: pnpm exec playwright test e2e/no-network.spec.ts --project=pixel-7 --project=desktop
