@@ -9,3 +9,8 @@ playwright-report/
 .DS_Store
 .lighthouseci/
 .wrangler/
+
+# Locally installed agent skills (third-party): never part of this repo.
+.agents/
+.claude/skills/
+skills-lock.json
