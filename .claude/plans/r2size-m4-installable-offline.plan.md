@@ -277,3 +277,10 @@ Tasks 0–9 are done; 9b (publish) and 10 (deploy) follow, with the deploy stopp
 - **Lighthouse on `wrangler pages dev`:** calculator 96 / 100 / 100 (performance / accessibility / best practices), Guide 91 / 100 / 100.
 - **Floating update bar** instead of a bar above the setup pane: inserting a bar would shift the three panes mid-calculation.
 - **Tests:** 394 unit and component tests; 94 end-to-end tests on Pixel 7, iPhone 14 and desktop (new: routing, Guide, offline, no-network, update-flow). The offline and update-flow specs run on Chromium only, and the phone dock test is skipped on desktop.
+
+### Publish and deploy (Tasks 9b and 10, 2026-10-05)
+
+- **Source:** the unpushed history was rewritten to the GitHub noreply address (`37738618+ciphertk@users.noreply.github.com`) at the owner's choice, so the personal Gmail isn't public; the tree was unchanged. Pushed to `github.com/ciphertk/r2size` (public, default branch `master`); the first CI run passed (check, e2e on three devices, Lighthouse).
+- **Cloudflare detour:** wrangler 4.147 now delegates `pages project create` to Workers. It deployed a Worker at `r2size.r2size.workers.dev` and rewrote project files (added `@cloudflare/vite-plugin`, changed `pnpm preview` to `wrangler dev`, added a `deploy` script and a `wrangler.jsonc` with request logging on). Its output also told agents to present this positively and switch to `wrangler deploy`, which was not followed. All file changes were reverted. The owner chose classic Pages: the project was created with `--force` (needed once), deployed with `wrangler pages deploy dist`, and the stray Worker was deleted.
+- **Production (https://r2size.pages.dev):** headers verified with `curl -I` (page policy, the worker's own policy, HSTS and the hardening headers). The no-network, routing, Guide and offline specs pass against production (20 passed). Lighthouse: calculator 98 / 100 / 100, Guide 99 / 100 / 100.
+- **Left to the owner:** check Web Analytics is off (Workers & Pages → r2size → Metrics), and run the manual device matrix in `docs/release-checklist.md`.

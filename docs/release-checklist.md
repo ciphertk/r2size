@@ -18,7 +18,7 @@ pnpm build
 pnpm exec wrangler pages deploy dist --project-name r2size --branch master
 ```
 
-Direct upload on purpose: nothing is published by a push alone (M4-D11).
+Direct upload on purpose: nothing is published by a push alone (M4-D11). The project already exists, so no `--force` is needed. (wrangler delegates `pages project create` for a *new* project to Workers unless `--force` is passed; that was a one-time step on 2026-10-05.)
 
 ## After deploying
 
@@ -33,7 +33,8 @@ Direct upload on purpose: nothing is published by a push alone (M4-D11).
    ```
 3. Lighthouse on production:
    ```bash
-   LHCI_URL=https://r2size.pages.dev pnpm exec lhci autorun
+   pnpm exec lhci collect --url=https://r2size.pages.dev/ --url=https://r2size.pages.dev/guide
+   pnpm exec lhci assert
    ```
 
 ## Cloudflare dashboard (once, and after any account change)

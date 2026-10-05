@@ -76,7 +76,7 @@ We'll know we're right when **the author and ≥5 other swing traders use it for
 | 1 | Correct sizing engine | Every sizing rule (risk, rounding, NSE tick, caps, costs, R values) produces verified-correct results for the worked examples | complete | [.claude/plans/r2size-m1-sizing-engine.plan.md](../plans/r2size-m1-sizing-engine.plan.md) |
 | 2 | Usable calculator | A trader can enter a setup and copy the quantity, entry and stop in under 15 s on a phone | complete | [.claude/plans/r2size-m2-usable-calculator.plan.md](../plans/r2size-m2-usable-calculator.plan.md) |
 | 3 | Remembers the trader | Account profile with a staleness reminder, presets, shareable URL setups, Export/Import | complete | [.claude/plans/r2size-m3-remembers-the-trader.plan.md](../plans/r2size-m3-remembers-the-trader.plan.md) |
-| 4 | Installable & offline | App installs on Android, iOS and desktop and works in airplane mode; trust page live; publicly deployed | in-progress | [.claude/plans/r2size-m4-installable-offline.plan.md](../plans/r2size-m4-installable-offline.plan.md) |
+| 4 | Installable & offline | App installs on Android, iOS and desktop and works in airplane mode; trust page live; publicly deployed | complete (live at https://r2size.pages.dev; manual device matrix pending) | [.claude/plans/r2size-m4-installable-offline.plan.md](../plans/r2size-m4-installable-offline.plan.md) |
 | 5 | Validated with users | Author + ≥5 traders using it weekly for 4 weeks; feedback captured to decide Phase 2 | pending | — |
 
 ## Decisions (2026-10-05)
